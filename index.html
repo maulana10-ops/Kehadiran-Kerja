@@ -1465,8 +1465,13 @@
             const k=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
             if(appData[k]?.status==='Hadir') hadir++;
         }
-        for(let i=1;i<=total;i++){
-            const k=`${y}-${m}-${i}`;
+        // Lembur dibayarkan bulan berikutnya: lembur Juli (1-31) cair di gajian Agustus, dst.
+        const prevRef  = new Date(y, m-1, 1);
+        const prevY    = prevRef.getFullYear();
+        const prevM    = prevRef.getMonth();
+        const prevTotal= new Date(prevY, prevM+1, 0).getDate();
+        for(let i=1;i<=prevTotal;i++){
+            const k=`${prevY}-${prevM}-${i}`;
             if(appData[k]?.lemburBayaran) lemburTotal += appData[k].lemburBayaran;
         }
         const gajiPokok = hadir*272900;
@@ -1475,7 +1480,7 @@
         document.getElementById('totalLemburVal').textContent=lemburTotal.toLocaleString('id-ID');
         document.getElementById('totalGaji').textContent=totalSemua.toLocaleString('id-ID');
         document.getElementById('periodeGaji').textContent=`16 ${monthsShort[start.getMonth()]} – 15 ${monthsShort[end.getMonth()]}`;
-        document.getElementById('lemburLabel').textContent=`Lemburan (1–${total} ${monthsName[m]})`;
+        document.getElementById('lemburLabel').textContent=`Lemburan (1–${prevTotal} ${monthsName[prevM]})`;
     }
 
     function resetAllData() {
