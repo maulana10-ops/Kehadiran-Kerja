@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Absensi Kerja</title>
+    <title>Absensi Kerja Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -20,840 +22,205 @@
             --glass-spec:   rgba(255,255,255,0.85);
             --glass-edge-a: rgba(255,140,200,0.10);
             --glass-edge-b: rgba(120,180,255,0.10);
+            --modal-bg:     rgba(255,255,255,0.72);
+            --input-bg:     rgba(255,255,255,0.55);
 
-            --hadir:    #0cb97a;
-            --hadir-bg: rgba(12,185,122,0.14);
-            --hadir-gl: rgba(12,185,122,0.30);
+            --bg-grad-1: #fce4ec; --bg-grad-2: #e8eaf6; --bg-grad-3: #e0f7fa;
+            --bg-grad-4: #f3e5f5; --bg-grad-5: #e8f5e9; --bg-grad-6: #fff8e1;
+            --bg-grad-7: #fce4ec; --bg-grad-8: #e3f2fd;
+            --body-blob-1: rgba(108,92,231,0.14);
+            --body-blob-2: rgba(0,206,201,0.12);
 
-            --libur:    #f04060;
-            --libur-bg: rgba(240,64,96,0.13);
-            --libur-gl: rgba(240,64,96,0.28);
-
-            --sakit:    #e8920a;
-            --sakit-bg: rgba(232,146,10,0.14);
-            --sakit-gl: rgba(232,146,10,0.28);
-
-            --izin:     #2f9de8;
-            --izin-bg:  rgba(47,157,232,0.13);
-            --izin-gl:  rgba(47,157,232,0.28);
-
-            --accent:    #6c5ce7;
-            --accent-2:  #a29bfe;
-            --accent-bg: rgba(108,92,231,0.14);
-            --accent-gl: rgba(108,92,231,0.30);
+            --hadir:    #0cb97a; --hadir-bg: rgba(12,185,122,0.14); --hadir-gl: rgba(12,185,122,0.30);
+            --libur:    #f04060; --libur-bg: rgba(240,64,96,0.13); --libur-gl: rgba(240,64,96,0.28);
+            --sakit:    #e8920a; --sakit-bg: rgba(232,146,10,0.14); --sakit-gl: rgba(232,146,10,0.28);
+            --izin:     #2f9de8; --izin-bg:  rgba(47,157,232,0.13); --izin-gl:  rgba(47,157,232,0.28);
+            --accent:   #6c5ce7; --accent-2: #a29bfe; --accent-bg: rgba(108,92,231,0.14); --accent-gl: rgba(108,92,231,0.30);
         }
 
-        html, body {
-            overflow-x: hidden;
-            width: 100%;
-            min-height: 100vh;
+        .dark-theme {
+            --text:      #f8f9fa;
+            --text-sub:  #cbd5e1;
+            --text-dim:  #94a3b8;
+
+            --glass-bg:     rgba(15, 23, 42, 0.45);
+            --glass-bg-hi:  rgba(30, 41, 59, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --glass-spec:   rgba(255, 255, 255, 0.05);
+            --glass-edge-a: rgba(255,255,255,0.03);
+            --glass-edge-b: rgba(255,255,255,0.03);
+            --modal-bg:     rgba(15, 23, 42, 0.85);
+            --input-bg:     rgba(30, 41, 59, 0.7);
+
+            --bg-grad-1: #0f172a; --bg-grad-2: #1e1b4b; --bg-grad-3: #172554;
+            --bg-grad-4: #2e1065; --bg-grad-5: #064e3b; --bg-grad-6: #451a03;
+            --bg-grad-7: #0f172a; --bg-grad-8: #172554;
+            --body-blob-1: rgba(108,92,231,0.25);
+            --body-blob-2: rgba(0,206,201,0.2);
         }
 
-        /* ── ANIMATED GRADIENT BG ── */
+        html, body { overflow-x: hidden; width: 100%; min-height: 100vh; transition: background 0.5s ease, color 0.5s ease; }
+
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            background: linear-gradient(-45deg,
-                #fce4ec, #e8eaf6, #e0f7fa,
-                #f3e5f5, #e8f5e9, #fff8e1,
-                #fce4ec, #e3f2fd);
-            background-size: 500% 500%;
-            animation: bgFloat 18s ease infinite;
+            font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text); display: flex; justify-content: center;
+            background: linear-gradient(-45deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-3), var(--bg-grad-4), var(--bg-grad-5), var(--bg-grad-6), var(--bg-grad-7), var(--bg-grad-8));
+            background-size: 500% 500%; animation: bgFloat 18s ease infinite;
         }
-        @keyframes bgFloat {
-            0%   { background-position: 0%   50%; }
-            25%  { background-position: 50%  0%;  }
-            50%  { background-position: 100% 50%; }
-            75%  { background-position: 50%  100%;}
-            100% { background-position: 0%   50%; }
-        }
+        @keyframes bgFloat { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* Floating blobs for depth */
         body::before, body::after {
-            content: '';
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(70px);
-            pointer-events: none;
-            z-index: 0;
-            animation: blobMove 20s ease-in-out infinite alternate;
+            content: ''; position: fixed; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0;
+            animation: blobMove 20s ease-in-out infinite alternate; transition: background 0.5s ease;
         }
-        body::before {
-            width: 380px; height: 380px;
-            background: rgba(108,92,231,0.14);
-            top: -80px; left: -80px;
-        }
-        body::after {
-            width: 320px; height: 320px;
-            background: rgba(0,206,201,0.12);
-            bottom: -60px; right: -60px;
-            animation-delay: -10s;
-        }
-        @keyframes blobMove {
-            0%   { transform: translate(0,0)   scale(1);   }
-            50%  { transform: translate(40px,30px) scale(1.1); }
-            100% { transform: translate(-20px,50px) scale(0.95); }
-        }
+        body::before { width: 380px; height: 380px; background: var(--body-blob-1); top: -80px; left: -80px; }
+        body::after { width: 320px; height: 320px; background: var(--body-blob-2); bottom: -60px; right: -60px; animation-delay: -10s; }
+        @keyframes blobMove { 0% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,30px) scale(1.1); } 100% { transform: translate(-20px,50px) scale(0.95); } }
 
-        /* ── GLASS MIXIN — LIQUID GLASS ── */
         .glass {
-            position: relative;
-            background-color: var(--glass-bg);
-            background-image:
-                radial-gradient(120% 70% at 18% -15%, var(--glass-spec) 0%, transparent 52%),
-                radial-gradient(90% 60% at 100% 115%, var(--glass-edge-b) 0%, transparent 60%),
-                radial-gradient(70% 50% at -10% 100%, var(--glass-edge-a) 0%, transparent 55%),
-                linear-gradient(115deg, rgba(255,255,255,0.30) 0%, transparent 28%, transparent 72%, rgba(255,255,255,0.16) 100%);
-            background-size: 100% 100%, 100% 100%, 100% 100%, 220% 220%;
-            background-position: 0 0, 0 0, 0 0, 0% 50%;
-            backdrop-filter: blur(20px) saturate(1.7) brightness(1.04);
-            -webkit-backdrop-filter: blur(20px) saturate(1.7) brightness(1.04);
+            position: relative; background-color: var(--glass-bg);
+            background-image: radial-gradient(120% 70% at 18% -15%, var(--glass-spec) 0%, transparent 52%), radial-gradient(90% 60% at 100% 115%, var(--glass-edge-b) 0%, transparent 60%), radial-gradient(70% 50% at -10% 100%, var(--glass-edge-a) 0%, transparent 55%), linear-gradient(115deg, rgba(255,255,255,0.10) 0%, transparent 28%, transparent 72%, rgba(255,255,255,0.05) 100%);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 220% 220%; background-position: 0 0, 0 0, 0 0, 0% 50%;
+            backdrop-filter: blur(20px) saturate(1.7); -webkit-backdrop-filter: blur(20px) saturate(1.7);
             border: 1.5px solid var(--glass-border);
-            box-shadow: var(--glass-shadow),
-                        inset 0 1.5px 1px rgba(255,255,255,0.85),
-                        inset 0 -10px 18px -14px rgba(60,70,120,0.35),
-                        inset 1px 0 0 rgba(255,255,255,0.30),
-                        inset -1px -1px 2px rgba(120,130,180,0.10);
-            animation: liquidDrift 13s ease-in-out infinite;
+            box-shadow: var(--glass-shadow), inset 0 1.5px 1px var(--glass-spec), inset 0 -10px 18px -14px rgba(0,0,0,0.3);
+            animation: liquidDrift 13s ease-in-out infinite; transition: all 0.3s ease;
         }
-        @keyframes liquidDrift {
-            0%, 100% { background-position: 0 0, 0 0, 0 0, 0% 50%; }
-            50%      { background-position: 0 0, 0 0, 0 0, 100% 50%; }
-        }
-        .glass:active {
-            box-shadow: var(--glass-shadow),
-                        inset 0 1.5px 1px rgba(255,255,255,0.98),
-                        inset 0 -6px 14px -10px rgba(60,70,120,0.5),
-                        inset 0 0 0 1px rgba(255,255,255,0.55);
-        }
+        @keyframes liquidDrift { 0%, 100% { background-position: 0 0, 0 0, 0 0, 0% 50%; } 50% { background-position: 0 0, 0 0, 0 0, 100% 50%; } }
+        
+        .container { position: relative; z-index: 1; width: 100%; max-width: 440px; padding: 22px 16px 40px; display: flex; flex-direction: column; gap: 14px; overflow-x: hidden; }
+        .container > * { animation: fadeUp 0.5s cubic-bezier(0.34,1.1,0.64,1) both; }
+        .container > *:nth-child(1) { animation-delay: 0.05s; } .container > *:nth-child(2) { animation-delay: 0.1s; } .container > *:nth-child(3) { animation-delay: 0.15s; } .container > *:nth-child(4) { animation-delay: 0.2s; } .container > *:nth-child(5) { animation-delay: 0.25s; } .container > *:nth-child(6) { animation-delay: 0.3s; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ── CONTAINER + STAGGER ANIMATION ── */
-        .container {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 440px;
-            padding: 22px 16px 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
+        .topbar { display: flex; align-items: center; justify-content: space-between; padding: 6px 2px; }
+        .topbar-eyebrow { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 3px; }
+        .topbar-title { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.01em; color: var(--text); line-height: 1.1; }
+        .topbar-title em { font-style: normal; background: linear-gradient(120deg, var(--accent) 0%, #fd79a8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        
+        .topbar-actions { display: flex; gap: 6px; }
+        .btn-act { width: 38px; height: 38px; border-radius: 12px; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); transition: 0.2s; }
+        .btn-act:active { transform: scale(0.86); }
+        .btn-act svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 
-        /* Page-load stagger */
-        .container > * {
-            animation: fadeUp 0.5s cubic-bezier(0.34,1.1,0.64,1) both;
-        }
-        .container > *:nth-child(1) { animation-delay: 0.05s; }
-        .container > *:nth-child(2) { animation-delay: 0.12s; }
-        .container > *:nth-child(3) { animation-delay: 0.19s; }
-        .container > *:nth-child(4) { animation-delay: 0.26s; }
-        .container > *:nth-child(5) { animation-delay: 0.33s; }
-        .container > *:nth-child(6) { animation-delay: 0.40s; }
-        .container > *:nth-child(7) { animation-delay: 0.47s; }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(22px); }
-            to   { opacity: 1; transform: translateY(0);    }
-        }
-
-        /* ── TOP BAR ── */
-        .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 2px;
-        }
-        .topbar-eyebrow {
-            font-size: 0.68rem;
-            font-weight: 600;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            margin-bottom: 3px;
-        }
-        /* ── TITLE FONT — round, wide, bold ── */
-        .topbar-title {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: -0.01em;
-            color: var(--text);
-            line-height: 1.1;
-        }
-        .topbar-title em {
-            font-style: normal;
-            background: linear-gradient(120deg, var(--accent) 0%, #fd79a8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .btn-reset {
-            width: 42px; height: 42px;
-            border-radius: 14px;
-            border: none;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            color: var(--libur);
-            transition: transform 0.18s, box-shadow 0.18s, border-radius 0.28s cubic-bezier(0.34,1.3,0.64,1);
-        }
-        .btn-reset:active { transform: scale(0.86) rotate(-30deg); border-radius: 50%; }
-        .btn-reset svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-
-        .topbar-actions { display: flex; gap: 8px; }
-
-        .sync-status {
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            font-size: 0.66rem; font-weight: 600; letter-spacing: 0.03em;
-            color: var(--text-dim);
-            padding: 0 4px 4px;
-            transition: color 0.3s;
-        }
-        .sync-status .dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: var(--text-dim);
-            display: inline-block;
-            transition: background 0.3s, box-shadow 0.3s;
-        }
-        .sync-status.online { color: var(--hadir); }
-        .sync-status.online .dot { background: var(--hadir); box-shadow: 0 0 6px var(--hadir-gl); animation: pulse 2s ease infinite; }
-        .sync-status.error { color: var(--libur); }
-        .sync-status.error .dot { background: var(--libur); }
-
-        /* Hidden selects */
+        .sync-status { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.66rem; font-weight: 600; color: var(--text-dim); padding: 0 4px 4px; }
+        .sync-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); }
+        .sync-status.online { color: var(--hadir); } .sync-status.online .dot { background: var(--hadir); box-shadow: 0 0 6px var(--hadir-gl); animation: pulse 2s infinite; }
+        
         #monthSelect, #yearSelect { display: none; }
-
-        /* ── MONTH NAV ── */
-        .month-nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 18px 18px;
-            border-radius: 22px;
-        }
-
-        .nav-arrow {
-            width: 44px; height: 44px;
-            border-radius: 14px;
-            border: none;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--text-sub);
-            transition: transform 0.18s, background 0.2s, box-shadow 0.18s, border-radius 0.28s cubic-bezier(0.34,1.3,0.64,1);
-        }
-        .nav-arrow:active { transform: scale(0.84); border-radius: 50%; }
+        .month-nav { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-radius: 20px; }
+        .nav-arrow { width: 40px; height: 40px; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-sub); transition: 0.2s; z-index: 10; }
+        .nav-arrow:active { transform: scale(0.84); }
         .nav-arrow svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-
         .month-center { text-align: center; flex: 1; }
-        .month-name {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            color: var(--text);
-            line-height: 1;
-            transition: opacity 0.2s, transform 0.2s;
-        }
-        .month-year {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.78rem;
-            color: var(--text-dim);
-            margin-top: 5px;
-            letter-spacing: 0.06em;
-        }
+        
+        #monthDisplayContainer { overflow: hidden; position: relative; height: 32px; }
+        #monthDisplay { font-size: 1.6rem; font-weight: 800; color: var(--text); line-height: 1; position: absolute; width: 100%; top: 0; left: 0;}
+        .month-year { font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--text-dim); margin-top: 5px; }
 
-        /* ── STATS ROW ── */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 9px;
-        }
-        .stat-chip {
-            border-radius: 16px;
-            padding: 14px 8px 12px;
-            text-align: center;
-            transition: transform 0.18s, border-radius 0.28s cubic-bezier(0.34,1.3,0.64,1);
-        }
-        .stat-chip:active { transform: scale(0.94); border-radius: 22px; }
-        .stat-num {
-            font-family: 'Space Mono', monospace;
-            font-size: 1.55rem;
-            font-weight: 700;
-            line-height: 1;
-            display: block;
-        }
-        .stat-chip.hadir .stat-num { color: var(--hadir); }
-        .stat-chip.libur .stat-num { color: var(--libur); }
-        .stat-chip.sakit .stat-num { color: var(--sakit); }
-        .stat-chip.izin  .stat-num { color: var(--izin);  }
-        .stat-label {
-            font-size: 0.62rem;
-            font-weight: 700;
-            letter-spacing: 0.07em;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            margin-top: 6px;
-            display: block;
-        }
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+        .stat-chip { border-radius: 16px; padding: 14px 8px 12px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .stat-chip:active { transform: scale(0.94); }
+        .stat-num { font-family: 'Space Mono', monospace; font-size: 1.55rem; font-weight: 700; line-height: 1; display: block; }
+        .stat-chip.hadir .stat-num { color: var(--hadir); } .stat-chip.libur .stat-num { color: var(--libur); } .stat-chip.lembur .stat-num { color: var(--accent); }
+        .stat-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-top: 6px; display: block; }
 
-        /* ── CALENDAR WRAPPER ── */
-        .calendar-wrapper {
-            will-change: transform, opacity;
-            touch-action: pan-y;
-        }
-
-        .day-headers {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            margin-bottom: 6px;
-            padding: 0 2px;
-        }
-        .day-header {
-            text-align: center;
-            font-size: 0.62rem;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            padding: 4px 0;
-        }
+        .calendar-wrapper { will-change: transform, opacity; touch-action: pan-x pan-y; overflow-x: hidden;}
+        .day-headers { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 6px; padding: 0 2px; }
+        .day-header { text-align: center; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); padding: 4px 0; }
         .day-header.weekend { color: var(--libur); }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            padding: 0 2px;
-        }
+        
+        .calendar-slider { width: 100%; transition: transform 0.3s ease-out, opacity 0.3s ease-out; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; padding: 0 2px; }
+        
         .date-empty { aspect-ratio: 1; }
-
-        .date-box {
-            aspect-ratio: 1;
-            border-radius: 13px;
-            border: 1.5px solid rgba(160,170,210,0.30);
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            font-weight: 700;
-            font-size: 0.88rem;
-            color: var(--text-sub);
-            background-color: rgba(255,255,255,0.28);
-            background-image: radial-gradient(120% 90% at 25% -20%, rgba(255,255,255,0.65), transparent 55%);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.55),
-                        0 2px 6px rgba(100,120,200,0.06);
-            transition: transform 0.15s cubic-bezier(0.34,1.3,0.64,1),
-                        background 0.25s ease,
-                        box-shadow 0.25s ease,
-                        border-color 0.25s ease,
-                        border-radius 0.28s cubic-bezier(0.34,1.3,0.64,1);
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            animation: cellPop 0.35s cubic-bezier(0.34,1.2,0.64,1) both;
-        }
-        @keyframes cellPop {
-            from { opacity: 0; transform: scale(0.7); }
-            to   { opacity: 1; transform: scale(1);   }
-        }
+        .date-box { aspect-ratio: 1; border-radius: 13px; border: 1.5px solid rgba(160,170,210,0.1); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; font-weight: 700; font-size: 0.88rem; color: var(--text-sub); background: var(--input-bg); backdrop-filter: blur(6px); transition: 0.2s; user-select: none; }
         .date-box:active { transform: scale(0.84); border-radius: 20px; }
-
-        .date-box.status-Hadir {
-            background: var(--hadir-bg);
-            border: 1.5px solid var(--hadir-gl);
-            color: var(--hadir);
-            box-shadow: 0 3px 12px var(--hadir-gl);
-        }
-        .date-box.status-Libur {
-            background: var(--libur-bg);
-            border: 1.5px solid var(--libur-gl);
-            color: var(--libur);
-            box-shadow: 0 3px 12px var(--libur-gl);
-        }
-        .date-box.status-Sakit {
-            background: var(--sakit-bg);
-            border: 1.5px solid var(--sakit-gl);
-            color: var(--sakit);
-            box-shadow: 0 3px 12px var(--sakit-gl);
-        }
-        .date-box.status-Izin {
-            background: var(--izin-bg);
-            border: 1.5px solid var(--izin-gl);
-            color: var(--izin);
-            box-shadow: 0 3px 12px var(--izin-gl);
-        }
-
-        .note-dot {
-            position: absolute;
-            top: 4px; right: 4px;
-            width: 5px; height: 5px;
-            border-radius: 50%;
-            background: var(--sakit);
-            box-shadow: 0 0 5px var(--sakit-gl);
-            display: none;
-        }
+        .date-box.status-Hadir { background: var(--hadir-bg); border-color: var(--hadir-gl); color: var(--hadir); box-shadow: 0 3px 12px var(--hadir-gl); }
+        .date-box.status-Libur { background: var(--libur-bg); border-color: var(--libur-gl); color: var(--libur); box-shadow: 0 3px 12px var(--libur-gl); }
+        .date-box.status-Sakit { background: var(--sakit-bg); border-color: var(--sakit-gl); color: var(--sakit); box-shadow: 0 3px 12px var(--sakit-gl); }
+        .date-box.status-Izin { background: var(--izin-bg); border-color: var(--izin-gl); color: var(--izin); box-shadow: 0 3px 12px var(--izin-gl); }
+        .note-dot { position: absolute; top: 4px; right: 4px; width: 5px; height: 5px; border-radius: 50%; background: var(--sakit); box-shadow: 0 0 5px var(--sakit-gl); display: none; }
         .has-note .note-dot { display: block; }
 
-        /* ── SALARY CARD ── */
-        .salary-card {
-            border-radius: 22px;
-            padding: 20px 22px;
-            position: relative;
-            overflow: hidden;
-        }
-        .salary-card::before {
-            content: '';
-            position: absolute;
-            top: -30px; right: -30px;
-            width: 110px; height: 110px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(108,92,231,0.18) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .salary-card::after {
-            content: '';
-            position: absolute;
-            bottom: -20px; left: 30px;
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(0,206,201,0.12) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .salary-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .salary-tag {
-            font-size: 0.66rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--text-sub);
-            display: flex; align-items: center; gap: 6px;
-        }
-        .salary-tag::before {
-            content: '';
-            width: 7px; height: 7px;
-            border-radius: 50%;
-            background: var(--accent);
-            box-shadow: 0 0 8px var(--accent-2);
-            display: inline-block;
-            animation: pulse 2s ease infinite;
-        }
-        @keyframes pulse {
-            0%,100% { box-shadow: 0 0 5px var(--accent-2); }
-            50%      { box-shadow: 0 0 14px var(--accent-2); }
-        }
-        .salary-periode {
-            font-size: 0.65rem;
-            color: var(--text-dim);
-            font-family: 'Space Mono', monospace;
-        }
+        .salary-card { border-radius: 22px; padding: 20px 22px; position: relative; overflow: hidden; }
+        .salary-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .salary-tag { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; color: var(--text-sub); display: flex; align-items: center; gap: 6px; }
+        .salary-tag::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { box-shadow: 0 0 5px var(--accent-2); } 50% { box-shadow: 0 0 14px var(--accent-2); } }
+        .salary-periode { font-size: 0.65rem; color: var(--text-dim); font-family: 'Space Mono', monospace; }
+        .salary-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; }
+        .salary-row-label { font-size: 0.78rem; font-weight: 600; color: var(--text-sub); }
+        .salary-row-value { font-family: 'Space Mono', monospace; font-size: 0.88rem; font-weight: 700; color: var(--text); }
+        .salary-row-value .rp { font-size: 0.7rem; font-weight: 400; color: var(--text-dim); margin-right: 2px; }
+        .salary-divider { height: 1px; margin: 6px 0 12px; background: linear-gradient(90deg, transparent, rgba(150,150,150,0.2), transparent); }
+        .salary-total-row { display: flex; align-items: center; justify-content: space-between; }
+        .salary-total-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); }
+        .salary-amount { font-family: 'Space Mono', monospace; font-size: 1.55rem; font-weight: 700; color: var(--text); }
+        .salary-sub { font-size: 0.67rem; color: var(--text-dim); margin-top: 8px; font-family: 'Space Mono', monospace; }
 
-        /* Breakdown rows */
-        .salary-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 7px 0;
-        }
-        .salary-row-label {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--text-sub);
-        }
-        .salary-row-value {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-        .salary-row-value .rp {
-            font-size: 0.7rem;
-            font-weight: 400;
-            color: var(--text-dim);
-            margin-right: 2px;
-        }
-        .salary-divider {
-            height: 1px;
-            margin: 6px 0 12px;
-            background: linear-gradient(90deg, transparent, rgba(90,100,150,0.22), transparent);
-        }
-        .salary-total-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .salary-total-label {
-            font-size: 0.68rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--text-dim);
-        }
-        .salary-amount {
-            font-family: 'Space Mono', monospace;
-            font-size: 1.55rem;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.02em;
-        }
-        .salary-amount span {
-            font-size: 0.85rem;
-            color: var(--text-sub);
-            margin-right: 3px;
-            font-weight: 400;
-        }
-        .salary-sub {
-            font-size: 0.67rem;
-            color: var(--text-dim);
-            margin-top: 8px;
-            font-family: 'Space Mono', monospace;
-        }
+        .btn-pdf { width: 100%; background: var(--input-bg); border: 1.5px solid rgba(150,150,150,0.2); color: var(--text); padding: 12px; border-radius: 12px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; margin-top: 15px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;}
+        .btn-pdf:active { transform: scale(0.96); background: var(--glass-bg-hi); }
+        .btn-pdf svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
 
-        /* ── FOOTER ── */
-        .footer {
-            text-align: center;
-            font-size: 0.72rem;
-            color: var(--text-dim);
-        }
-        .footer strong { color: var(--text-sub); font-weight: 600; }
-        .footer a {
-            color: var(--accent);
-            font-weight: 700;
-            text-decoration: none;
-            position: relative;
-            transition: color 0.2s;
-        }
-        .footer a::after {
-            content: '';
-            position: absolute;
-            left: 0; bottom: -1px;
-            width: 100%; height: 1.5px;
-            background: linear-gradient(90deg, var(--accent), #fd79a8);
-            border-radius: 99px;
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.25s cubic-bezier(0.34,1.2,0.64,1);
-        }
-        .footer a:hover { color: #fd79a8; }
-        .footer a:hover::after { transform: scaleX(1); }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); z-index: 1000; align-items: flex-end; justify-content: center; }
+        .modal-overlay.active { display: flex; animation: overlayIn 0.28s ease-out; }
+        @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-sheet { position: relative; background: var(--modal-bg); backdrop-filter: blur(28px); border: 1.5px solid var(--glass-border); border-bottom: none; border-radius: 30px 30px 0 0; width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; padding: 0 22px 40px; box-shadow: 0 -8px 48px rgba(0,0,0,0.2); animation: sheetUp 0.38s; }
+        @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-overlay.closing .modal-sheet { animation: sheetDown 0.28s forwards; }
+        @keyframes sheetDown { from { transform: translateY(0); } to { transform: translateY(100%); opacity: 0; } }
 
-        /* ── BOTTOM SHEET MODAL ── */
-        .modal-overlay {
-            display: none;
-            position: fixed; inset: 0;
-            background: rgba(30,40,80,0.30);
-            backdrop-filter: blur(16px) saturate(1.4);
-            -webkit-backdrop-filter: blur(16px) saturate(1.4);
-            z-index: 1000;
-            align-items: flex-end;
-            justify-content: center;
-        }
-        .modal-overlay.active {
-            display: flex;
-            animation: overlayIn 0.28s ease-out;
-        }
-        @keyframes overlayIn {
-            from { opacity: 0; }
-            to   { opacity: 1; }
-        }
-
-        .modal-sheet {
-            position: relative;
-            background-color: rgba(255,255,255,0.72);
-            background-image:
-                radial-gradient(90% 40% at 50% -5%, rgba(255,255,255,0.65), transparent 60%),
-                radial-gradient(60% 40% at 100% 100%, var(--glass-edge-b) 0%, transparent 60%);
-            backdrop-filter: blur(28px) saturate(1.8) brightness(1.03);
-            -webkit-backdrop-filter: blur(28px) saturate(1.8) brightness(1.03);
-            border: 1.5px solid rgba(255,255,255,0.85);
-            border-bottom: none;
-            border-radius: 30px 30px 0 0;
-            width: 100%; max-width: 440px;
-            max-height: 92vh; overflow-y: auto;
-            padding: 0 22px 40px;
-            box-shadow: 0 -8px 48px rgba(80,100,180,0.14),
-                        inset 0 1px 0 rgba(255,255,255,0.9);
-            animation: sheetUp 0.38s cubic-bezier(0.34,1.15,0.64,1);
-        }
-        @keyframes sheetUp {
-            from { transform: translateY(100%); opacity: 0.6; }
-            to   { transform: translateY(0);    opacity: 1;   }
-        }
-        .modal-overlay.closing .modal-sheet {
-            animation: sheetDown 0.28s cubic-bezier(0.4,0,0.6,1) forwards;
-        }
-        @keyframes sheetDown {
-            from { transform: translateY(0);    opacity: 1; }
-            to   { transform: translateY(100%); opacity: 0; }
-        }
-
-        .sheet-handle-row {
-            display: flex; justify-content: center;
-            padding: 14px 0 6px;
-        }
-        .sheet-handle {
-            width: 40px; height: 4px;
-            background: rgba(0,0,0,0.12);
-            border-radius: 99px;
-        }
-
-        .sheet-header {
-            display: flex; align-items: flex-start;
-            justify-content: space-between;
-            padding: 14px 0 18px;
-            border-bottom: 1px solid rgba(0,0,0,0.07);
-        }
-        .sheet-date-label {
-            font-size: 0.65rem; font-weight: 700;
-            letter-spacing: 0.12em; text-transform: uppercase;
-            color: var(--text-dim); margin-bottom: 4px;
-        }
-        .sheet-date {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.28rem; font-weight: 800;
-            color: var(--text);
-        }
-        .btn-close-sheet {
-            width: 36px; height: 36px;
-            background: rgba(0,0,0,0.06);
-            border: 1px solid rgba(0,0,0,0.09);
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text-sub);
-            transition: transform 0.18s, background 0.18s;
-            flex-shrink: 0;
-        }
-        .btn-close-sheet:active { transform: scale(0.84); background: rgba(0,0,0,0.12); }
-        .btn-close-sheet svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; }
-
+        .sheet-handle-row { display: flex; justify-content: center; padding: 14px 0 6px; }
+        .sheet-handle { width: 40px; height: 4px; background: rgba(150,150,150,0.4); border-radius: 99px; }
+        .sheet-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 14px 0 18px; border-bottom: 1px solid rgba(150,150,150,0.2); }
+        .sheet-date-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+        .sheet-date { font-size: 1.28rem; font-weight: 800; color: var(--text); }
+        
         .field-group { margin-top: 18px; }
-        .field-label {
-            font-size: 0.68rem; font-weight: 700;
-            letter-spacing: 0.1em; text-transform: uppercase;
-            color: var(--text-dim); margin-bottom: 9px;
-            display: block;
-        }
-
-        /* Status pills */
+        .field-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 9px; display: block; }
+        
         .status-pills { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
-        .status-pill {
-            padding: 11px 6px; border-radius: 13px;
-            border: 1.5px solid rgba(0,0,0,0.08);
-            background: rgba(255,255,255,0.55);
-            text-align: center; cursor: pointer;
-            font-size: 0.72rem; font-weight: 700;
-            color: var(--text-sub);
-            transition: all 0.2s cubic-bezier(0.34,1.2,0.64,1), border-radius 0.28s cubic-bezier(0.34,1.3,0.64,1);
-            user-select: none; -webkit-tap-highlight-color: transparent;
-        }
-        .status-pill .pill-icon { font-size: 1rem; display: block; margin-bottom: 4px; }
-        .status-pill:active { transform: scale(0.90); border-radius: 20px; }
-        .status-pill.active-Hadir { background: var(--hadir-bg); border-color: var(--hadir); color: var(--hadir); transform: scale(1.04); box-shadow: 0 4px 12px var(--hadir-gl); }
-        .status-pill.active-Libur { background: var(--libur-bg); border-color: var(--libur); color: var(--libur); transform: scale(1.04); box-shadow: 0 4px 12px var(--libur-gl); }
-        .status-pill.active-Sakit { background: var(--sakit-bg); border-color: var(--sakit); color: var(--sakit); transform: scale(1.04); box-shadow: 0 4px 12px var(--sakit-gl); }
-        .status-pill.active-Izin  { background: var(--izin-bg);  border-color: var(--izin);  color: var(--izin);  transform: scale(1.04); box-shadow: 0 4px 12px var(--izin-gl); }
+        .status-pill { padding: 11px 6px; border-radius: 13px; border: 1.5px solid rgba(150,150,150,0.2); background: var(--input-bg); text-align: center; cursor: pointer; font-size: 0.72rem; font-weight: 700; color: var(--text-sub); transition: 0.2s; }
+        .status-pill.active-Hadir { background: var(--hadir-bg); border-color: var(--hadir); color: var(--hadir); transform: scale(1.04); }
+        .status-pill.active-Libur { background: var(--libur-bg); border-color: var(--libur); color: var(--libur); transform: scale(1.04); }
+        .status-pill.active-Sakit { background: var(--sakit-bg); border-color: var(--sakit); color: var(--sakit); transform: scale(1.04); }
+        .status-pill.active-Izin { background: var(--izin-bg); border-color: var(--izin); color: var(--izin); transform: scale(1.04); }
 
-        #statusSelect { display: none; }
-
-        /* Lembur pills */
-        .lembur-pills { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; }
-        .lembur-pill {
-            padding: 10px 4px; border-radius: 13px;
-            border: 1.5px solid rgba(0,0,0,0.08);
-            background: rgba(255,255,255,0.55);
-            text-align: center; cursor: pointer;
-            font-size: 0.66rem; font-weight: 700;
-            color: var(--text-sub);
-            transition: all 0.2s cubic-bezier(0.34,1.2,0.64,1), border-radius 0.28s cubic-bezier(0.34,1.3,0.64,1);
-            user-select: none; -webkit-tap-highlight-color: transparent;
-        }
-        .lembur-pill:active { transform: scale(0.90); border-radius: 20px; }
-        .lembur-pill.active-lembur {
-            background: var(--accent-bg); border-color: var(--accent); color: var(--accent);
-            transform: scale(1.04); box-shadow: 0 4px 12px var(--accent-gl);
-        }
-        #lemburSelect { display: none; }
-        .lembur-info {
-            margin-top: 10px;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: var(--text-sub);
-            text-align: center;
-            padding: 10px 8px;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.45);
-            border: 1.5px solid rgba(0,0,0,0.06);
-            transition: color 0.2s;
-        }
-        .lembur-info.has-lembur { color: var(--accent); }
-
-        /* Time inputs */
         .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .time-wrapper { position: relative; }
-        .time-input {
-            width: 100%;
-            background: rgba(255,255,255,0.55);
-            border: 1.5px solid rgba(0,0,0,0.09);
-            color: var(--text);
-            padding: 14px 16px;
-            border-radius: 14px;
-            font-size: 1rem;
-            font-family: 'Space Mono', monospace;
-            font-weight: 700;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-        }
-        .time-input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(108,92,231,0.14);
-            background: rgba(255,255,255,0.80);
-        }
-        .time-input.empty-time::-webkit-datetime-edit { color: transparent; }
-        .time-input:focus::-webkit-datetime-edit { color: var(--text); }
-        .time-input::-webkit-calendar-picker-indicator { opacity: 0.35; cursor: pointer; }
-        .time-ph {
-            position: absolute; left: 16px; top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-dim); font-size: 0.85rem; font-weight: 600;
-            pointer-events: none;
-        }
-        .time-input:focus ~ .time-ph,
-        .time-input:not(.empty-time) ~ .time-ph { display: none; }
+        .time-input, .notes-input { width: 100%; background: var(--input-bg); border: 1.5px solid rgba(150,150,150,0.2); color: var(--text); padding: 14px; border-radius: 14px; outline: none; font-family: 'Space Mono', monospace; transition: 0.2s; }
+        .time-input:focus, .notes-input:focus { border-color: var(--accent); background: var(--glass-bg-hi); }
+        
+        .lembur-pills { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; }
+        .lembur-pill { padding: 10px 4px; border-radius: 13px; border: 1.5px solid rgba(150,150,150,0.2); background: var(--input-bg); text-align: center; cursor: pointer; font-size: 0.66rem; font-weight: 700; color: var(--text-sub); transition: 0.2s; }
+        .lembur-pill.active-lembur { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); transform: scale(1.04); }
+        .lembur-info { margin-top: 10px; font-family: 'Space Mono', monospace; font-size: 0.78rem; font-weight: 700; color: var(--text-sub); text-align: center; padding: 10px; border-radius: 12px; background: var(--input-bg); border: 1.5px solid rgba(150,150,150,0.2); }
+        
+        .btn-save { width: 100%; background: linear-gradient(135deg, var(--accent) 0%, #a29bfe 100%); border: none; color: white; padding: 17px; border-radius: 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 22px; transition: 0.2s; opacity: 0.38; }
+        .btn-save.can-save { opacity: 1; } .btn-save.can-save:active { transform: scale(0.97); }
 
-        /* Notes */
-        .notes-input {
-            width: 100%;
-            background: rgba(255,255,255,0.55);
-            border: 1.5px solid rgba(0,0,0,0.09);
-            color: var(--text);
-            padding: 14px 16px;
-            border-radius: 14px;
-            font-size: 0.92rem; font-family: 'Plus Jakarta Sans', sans-serif;
-            font-weight: 500; outline: none; resize: none;
-            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-        }
-        .notes-input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(108,92,231,0.14);
-            background: rgba(255,255,255,0.80);
-        }
-        .notes-input::placeholder { color: var(--text-dim); }
+        .loc-box { display: flex; align-items: center; gap: 10px; background: var(--input-bg); border: 1.5px solid rgba(150,150,150,0.2); padding: 10px 14px; border-radius: 14px;}
+        .btn-loc { background: rgba(108,92,231,0.1); color: var(--accent); border: none; padding: 8px 12px; border-radius: 10px; font-weight: 700; font-size: 0.75rem; cursor: pointer; transition: 0.2s;}
+        .btn-loc:active { transform: scale(0.9); }
+        .loc-text { font-size: 0.75rem; color: var(--text-dim); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .loc-text a { color: var(--izin); text-decoration: none; font-weight: bold; }
 
-        /* Photo */
-        .photo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .photo-box {
-            border-radius: 16px;
-            border: 1.5px dashed rgba(0,0,0,0.14);
-            background: rgba(255,255,255,0.45);
-            height: 108px;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            cursor: pointer; position: relative; overflow: hidden;
-            transition: transform 0.18s, border-color 0.2s;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .photo-box:active { transform: scale(0.94); border-color: var(--accent); }
-        .photo-placeholder {
-            display: flex; flex-direction: column; align-items: center;
-            color: var(--text-dim); gap: 7px;
-        }
-        .photo-placeholder svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-        .photo-placeholder span { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
-        .photo-img {
-            width: 100%; height: 100%; object-fit: cover;
-            display: none; position: absolute; inset: 0; z-index: 2; border-radius: 15px;
-        }
-        .photo-actions {
-            position: absolute; inset: 0;
-            background: rgba(255,255,255,0.72);
-            backdrop-filter: blur(6px);
-            display: none; justify-content: center; align-items: center; gap: 8px;
-            z-index: 5; border-radius: 15px;
-        }
-        .photo-box.has-photo .photo-actions { display: flex; }
-        .btn-photo-act {
-            width: 34px; height: 34px;
-            background: rgba(255,255,255,0.85);
-            border: 1px solid rgba(0,0,0,0.10);
-            border-radius: 11px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text);
-            transition: transform 0.18s;
-        }
-        .btn-photo-act:active { transform: scale(0.84); }
-        .btn-photo-act.danger { color: var(--libur); background: var(--libur-bg); }
-        .btn-photo-act svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        /* TEMPLATE PDF (Tersembunyi tapi di-render) */
+        #pdf-template { position: absolute; left: -9999px; top: -9999px; width: 800px; padding: 50px; background: white; color: black; font-family: sans-serif; }
+        .pdf-header { text-align: center; margin-bottom: 30px; }
+        .pdf-header h1 { font-size: 28px; color: #2c3e50; margin-bottom: 5px; }
+        .pdf-header p { font-size: 14px; color: #7f8c8d; }
+        .pdf-info { display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 16px; }
+        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+        .pdf-table th, .pdf-table td { border: 1px solid #bdc3c7; padding: 12px; font-size: 16px; }
+        .pdf-table th { background-color: #ecf0f1; text-align: left; }
+        .pdf-footer { text-align: right; font-size: 14px; color: #7f8c8d; font-style: italic; }
 
-        /* Save button */
-        .btn-save {
-            width: 100%;
-            background: linear-gradient(135deg, var(--accent) 0%, #a29bfe 100%);
-            background-image:
-                radial-gradient(120% 160% at 20% -40%, rgba(255,255,255,0.55), transparent 55%),
-                linear-gradient(135deg, var(--accent) 0%, #a29bfe 100%);
-            border: none; color: white;
-            padding: 17px; border-radius: 16px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1rem; font-weight: 700;
-            cursor: pointer; margin-top: 22px;
-            transition: transform 0.2s, opacity 0.25s, box-shadow 0.2s, border-radius 0.25s cubic-bezier(0.34,1.3,0.64,1);
-            opacity: 0.38;
-            box-shadow: 0 6px 24px rgba(108,92,231,0.25),
-                        inset 0 1px 1px rgba(255,255,255,0.5);
-        }
-        .btn-save.can-save { opacity: 1; }
-        .btn-save.can-save:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(108,92,231,0.2); border-radius: 22px; }
-
-        /* Preview modal */
-        .preview-modal {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,0.92); z-index: 2000;
-            justify-content: center; align-items: center;
-        }
-        .preview-modal.active { display: flex; animation: overlayIn 0.2s ease-out; }
-        .preview-img { max-width: 96%; max-height: 90vh; border-radius: 16px; object-fit: contain; }
-        .btn-close-preview {
-            position: absolute; top: 20px; right: 20px;
-            background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
-            color: white; width: 44px; height: 44px;
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; backdrop-filter: blur(6px);
-            transition: transform 0.18s;
-        }
-        .btn-close-preview:active { transform: scale(0.86); }
-        .btn-close-preview svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 99px; }
-
-        /* Responsive */
-        @media (max-width: 360px) {
-            .month-name { font-size: 1.5rem; }
-            .stat-num   { font-size: 1.3rem; }
-            .topbar-title { font-size: 1.15rem; }
-            .date-box { font-size: 0.78rem; border-radius: 10px; }
-            .calendar-grid, .day-headers { gap: 4px; }
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-
     <!-- TOP BAR -->
     <div class="topbar">
         <div>
@@ -861,167 +228,106 @@
             <div class="topbar-title">Kehadiran <em>Kerja</em></div>
         </div>
         <div class="topbar-actions">
-            <button class="btn-reset glass" id="btnAuth" onclick="handleAuthClick()" title="Login / Logout Google" style="border-radius:14px; color:var(--accent);">
-                <svg viewBox="0 0 24 24"><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            <button class="btn-act glass" onclick="enableNotifications()" title="Aktifkan Pengingat">
+                <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
             </button>
-            <button class="btn-reset glass" onclick="resetAllData()" title="Reset Semua Data">
-                <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            <button class="btn-act glass" onclick="toggleTheme()" title="Ubah Tema" id="btnTheme">
+                <svg viewBox="0 0 24 24" id="iconSun"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+            <button class="btn-act glass" id="btnAuth" onclick="handleAuthClick()" title="Login Firebase" style="color:var(--accent);">
+                <svg viewBox="0 0 24 24"><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
             </button>
         </div>
     </div>
-    <div class="sync-status" id="syncStatus"><span class="dot"></span>Mode offline (belum login)</div>
+    <div class="sync-status" id="syncStatus"><span class="dot"></span>Mode offline</div>
 
-    <!-- HIDDEN SELECTS -->
-    <select id="monthSelect"></select>
-    <select id="yearSelect"></select>
+    <select id="monthSelect"></select> <select id="yearSelect"></select>
 
     <!-- MONTH NAV -->
-    <div class="month-nav glass" style="border-radius:22px;">
-        <button class="nav-arrow glass" onclick="changeMonth(-1)">
-            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
+    <div class="month-nav glass">
+        <button class="nav-arrow glass" onclick="triggerMonthChange(-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
         <div class="month-center">
-            <div class="month-name" id="monthDisplay">—</div>
+            <div id="monthDisplayContainer">
+                <div class="month-name" id="monthDisplay">—</div>
+            </div>
             <div class="month-year" id="yearDisplay">—</div>
         </div>
-        <button class="nav-arrow glass" onclick="changeMonth(1)">
-            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
+        <button class="nav-arrow glass" onclick="triggerMonthChange(1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
     </div>
 
     <!-- STATS ROW -->
     <div class="stats-row">
-        <div class="stat-chip glass hadir">
-            <span class="stat-num" id="totalHadir">0</span>
-            <span class="stat-label">Hadir</span>
-        </div>
-        <div class="stat-chip glass libur">
-            <span class="stat-num" id="totalLibur">0</span>
-            <span class="stat-label">Libur</span>
-        </div>
-        <div class="stat-chip glass sakit">
-            <span class="stat-num" id="totalSakit">0</span>
-            <span class="stat-label">Sakit</span>
-        </div>
-        <div class="stat-chip glass izin">
-            <span class="stat-num" id="totalIzin">0</span>
-            <span class="stat-label">Izin</span>
-        </div>
+        <!-- Hadir & Libur: Periode Gaji (16-15) -->
+        <div class="stat-chip glass hadir" onclick="openHadirDetail()"><span class="stat-num" id="totalHadir">0</span><span class="stat-label">Hadir</span></div>
+        <div class="stat-chip glass libur"><span class="stat-num" id="totalLibur">0</span><span class="stat-label">Libur</span></div>
+        <!-- Lemburan: Bulan Berjalan (1-31) -->
+        <div class="stat-chip glass lembur" onclick="openLemburDetail()"><span class="stat-num" id="totalJamLembur">0</span><span class="stat-label">Lemburan (Jam)</span></div>
     </div>
 
     <!-- CALENDAR -->
     <div id="calendar-wrapper" class="calendar-wrapper">
         <div class="day-headers">
-            <div class="day-header weekend">Min</div>
-            <div class="day-header">Sen</div>
-            <div class="day-header">Sel</div>
-            <div class="day-header">Rab</div>
-            <div class="day-header">Kam</div>
-            <div class="day-header">Jum</div>
-            <div class="day-header weekend">Sab</div>
+            <div class="day-header weekend">Min</div><div class="day-header">Sen</div><div class="day-header">Sel</div><div class="day-header">Rab</div><div class="day-header">Kam</div><div class="day-header">Jum</div><div class="day-header weekend">Sab</div>
         </div>
-        <div class="calendar-grid" id="calendar"></div>
+        <div id="calendar-slider" class="calendar-slider">
+            <div class="calendar-grid" id="calendar"></div>
+        </div>
     </div>
 
     <!-- SALARY CARD -->
-    <div class="salary-card glass" style="border-radius:22px;">
-        <div class="salary-top">
-            <span class="salary-tag">Estimasi Gaji</span>
-            <span class="salary-periode" id="periodeGaji">—</span>
-        </div>
-
-        <div class="salary-row">
-            <span class="salary-row-label">Gaji Pokok</span>
-            <span class="salary-row-value"><span class="rp">Rp</span><span id="gajiPokokVal">0</span></span>
-        </div>
-        <div class="salary-row">
-            <span class="salary-row-label" id="lemburLabel">Lemburan</span>
-            <span class="salary-row-value"><span class="rp">Rp</span><span id="totalLemburVal">0</span></span>
-        </div>
-
+    <div class="salary-card glass">
+        <div class="salary-top"><span class="salary-tag">Estimasi Gaji</span><span class="salary-periode" id="periodeGaji">—</span></div>
+        <div class="salary-row"><span class="salary-row-label">Gaji Pokok</span><span class="salary-row-value"><span class="rp">Rp</span><span id="gajiPokokVal">0</span></span></div>
+        <div class="salary-row"><span class="salary-row-label" id="lemburLabel">Lemburan</span><span class="salary-row-value"><span class="rp">Rp</span><span id="totalLemburVal">0</span></span></div>
         <div class="salary-divider"></div>
-
-        <div class="salary-total-row">
-            <span class="salary-total-label">Total Estimasi</span>
-            <div class="salary-amount">
-                <span>Rp</span><span id="totalGaji">0</span>
-            </div>
-        </div>
+        <div class="salary-total-row"><span class="salary-total-label">Total Estimasi</span><div class="salary-amount"><span>Rp</span><span id="totalGaji">0</span></div></div>
         <div class="salary-sub">@ Rp 272.900 / hari hadir</div>
+        
+        <button class="btn-pdf" onclick="generatePDF()">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+            Unduh Slip Gaji (PDF)
+        </button>
     </div>
-
-    <div class="footer">&copy; 2026 Copyright By <a href="https://www.instagram.com/adriannnm10?igsh=Z2V3MWppOW81bnB1" target="_blank" rel="noopener">Adrian Maulana</a></div>
-
 </div>
 
-<!-- BOTTOM SHEET MODAL -->
-<div class="modal-overlay" id="modal" onclick="handleOverlayClick(event)">
+<!-- BOTTOM SHEET MODAL (ABSENSI PENGISIAN) -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this) closeModal()">
     <div class="modal-sheet" id="modalSheet">
         <div class="sheet-handle-row"><div class="sheet-handle"></div></div>
-
         <div class="sheet-header">
-            <div>
-                <div class="sheet-date-label">Presensi untuk</div>
-                <div class="sheet-date" id="modalDate">—</div>
-            </div>
-            <button class="btn-close-sheet" onclick="closeModal()">
-                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+            <div><div class="sheet-date-label">Presensi untuk</div><div class="sheet-date" id="modalDate">—</div></div>
+            <button class="btn-act glass" onclick="closeModal()" style="border-radius:12px;"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
 
-        <select id="statusSelect">
-            <option value=""></option>
-            <option value="Hadir">Hadir</option>
-            <option value="Libur">Libur</option>
-            <option value="Sakit">Sakit</option>
-            <option value="Izin">Izin</option>
-        </select>
+        <select id="statusSelect" style="display:none;"><option value=""></option><option value="Hadir">Hadir</option><option value="Libur">Libur</option><option value="Sakit">Sakit</option><option value="Izin">Izin</option></select>
 
         <div class="field-group">
             <span class="field-label">Status Kehadiran</span>
             <div class="status-pills">
-                <div class="status-pill" data-val="Hadir" onclick="setPill('Hadir')">
-                    <span class="pill-icon">✅</span>Hadir
-                </div>
-                <div class="status-pill" data-val="Libur" onclick="setPill('Libur')">
-                    <span class="pill-icon">🔴</span>Libur
-                </div>
-                <div class="status-pill" data-val="Sakit" onclick="setPill('Sakit')">
-                    <span class="pill-icon">🌡️</span>Sakit
-                </div>
-                <div class="status-pill" data-val="Izin" onclick="setPill('Izin')">
-                    <span class="pill-icon">📋</span>Izin
-                </div>
+                <div class="status-pill" data-val="Hadir" onclick="setPill('Hadir')">✅ Hadir</div>
+                <div class="status-pill" data-val="Libur" onclick="setPill('Libur')">🔴 Libur</div>
+                <div class="status-pill" data-val="Sakit" onclick="setPill('Sakit')">🌡️ Sakit</div>
+                <div class="status-pill" data-val="Izin" onclick="setPill('Izin')">📋 Izin</div>
             </div>
         </div>
 
         <div class="field-group">
             <span class="field-label">Waktu</span>
             <div class="time-row">
-                <div class="time-wrapper">
-                    <input type="time" id="jamMasuk" class="time-input empty-time"
-                        oninput="this.classList.toggle('empty-time',!this.value)"
-                        onchange="this.classList.toggle('empty-time',!this.value)"
-                        onclick="this.type='time';try{this.showPicker()}catch(e){}">
-                    <div class="time-ph">Jam masuk</div>
-                </div>
-                <div class="time-wrapper">
-                    <input type="time" id="jamKeluar" class="time-input empty-time"
-                        oninput="this.classList.toggle('empty-time',!this.value)"
-                        onchange="this.classList.toggle('empty-time',!this.value)"
-                        onclick="this.type='time';try{this.showPicker()}catch(e){}">
-                    <div class="time-ph">Jam keluar</div>
-                </div>
+                <input type="time" id="jamMasuk" class="time-input empty-time">
+                <input type="time" id="jamKeluar" class="time-input empty-time">
+            </div>
+        </div>
+        
+        <div class="field-group">
+            <span class="field-label">Lokasi Saat Absen</span>
+            <div class="loc-box">
+                <button type="button" class="btn-loc" onclick="dapatkanLokasi()">📍 Ambil Lokasi</button>
+                <span id="locStatus" class="loc-text">Belum direkam</span>
             </div>
         </div>
 
-        <select id="lemburSelect">
-            <option value="0">0</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-        </select>
+        <select id="lemburSelect" style="display:none;"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
 
         <div class="field-group">
             <span class="field-label">Lemburan</span>
@@ -1040,200 +346,75 @@
             <textarea id="keterangan" class="notes-input" rows="2" placeholder="Tulis keterangan..."></textarea>
         </div>
 
-        <div class="field-group">
-            <span class="field-label">Foto Bukti</span>
-            <div class="photo-row">
-                <div class="photo-box" id="boxIn" onclick="document.getElementById('fileIn').click()">
-                    <input type="file" id="fileIn" accept="image/*" capture="camera" hidden onchange="handlePhoto(event,'In')">
-                    <div class="photo-placeholder" id="phIn">
-                        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                        <span>Clock In</span>
-                    </div>
-                    <img class="photo-img" id="imgIn">
-                    <div class="photo-actions" id="actIn" onclick="event.stopPropagation()">
-                        <button class="btn-photo-act" onclick="openPreview('In')">
-                            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        </button>
-                        <button class="btn-photo-act" onclick="document.getElementById('fileIn').click()">
-                            <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                        </button>
-                        <button class="btn-photo-act danger" onclick="removePhoto('In')">
-                            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="photo-box" id="boxOut" onclick="document.getElementById('fileOut').click()">
-                    <input type="file" id="fileOut" accept="image/*" capture="camera" hidden onchange="handlePhoto(event,'Out')">
-                    <div class="photo-placeholder" id="phOut">
-                        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                        <span>Clock Out</span>
-                    </div>
-                    <img class="photo-img" id="imgOut">
-                    <div class="photo-actions" id="actOut" onclick="event.stopPropagation()">
-                        <button class="btn-photo-act" onclick="openPreview('Out')">
-                            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        </button>
-                        <button class="btn-photo-act" onclick="document.getElementById('fileOut').click()">
-                            <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                        </button>
-                        <button class="btn-photo-act danger" onclick="removePhoto('Out')">
-                            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <button id="saveBtn" class="btn-save" onclick="saveData()" disabled>Simpan Presensi</button>
     </div>
 </div>
 
-<!-- PREVIEW MODAL -->
-<div class="preview-modal" id="previewModal">
-    <button class="btn-close-preview" onclick="closePreview()">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-    <img class="preview-img" id="previewImageFull" src="">
+<!-- MODAL DETAIL KEHADIRAN -->
+<div class="modal-overlay" id="hadirModal" onclick="if(event.target===this) this.classList.remove('active')">
+    <div class="modal-sheet">
+        <div class="sheet-handle-row"><div class="sheet-handle"></div></div>
+        <div class="sheet-header"><div><div class="sheet-date-label">Rincian Periode Gaji</div><div class="sheet-date">Data Kehadiran</div></div></div>
+        <div class="field-group">
+            <div class="salary-row"><span class="salary-row-label">✅ Hadir</span><span class="salary-row-value" id="detHadir">0 Hari</span></div>
+            <div class="salary-row"><span class="salary-row-label">🔴 Libur</span><span class="salary-row-value" id="detLibur">0 Hari</span></div>
+            <div class="salary-row"><span class="salary-row-label">🌡️ Sakit</span><span class="salary-row-value" id="detSakit">0 Hari</span></div>
+            <div class="salary-row"><span class="salary-row-label">📋 Izin</span><span class="salary-row-value" id="detIzin">0 Hari</span></div>
+            <div class="salary-divider"></div>
+            <div class="salary-total-row"><span class="salary-total-label">Hadir (Periode Gaji)</span><div class="salary-amount"><span id="detHadirGaji">0</span> <span>Hari</span></div></div>
+        </div>
+    </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     FIREBASE SYNC
-     1. Buat project di https://console.firebase.google.com
-     2. Build > Authentication > Sign-in method > aktifkan "Google"
-     3. Build > Firestore Database > Create database
-     4. Firestore > Rules, pakai aturan berikut lalu Publish:
+<!-- MODAL DETAIL LEMBURAN -->
+<div class="modal-overlay" id="lemburModal" onclick="if(event.target===this) this.classList.remove('active')">
+    <div class="modal-sheet">
+        <div class="sheet-handle-row"><div class="sheet-handle"></div></div>
+        <div class="sheet-header"><div><div class="sheet-date-label">Rincian Bulan Ini</div><div class="sheet-date">Total Lemburan (Jam)</div></div></div>
+        <div class="field-group">
+            <div class="salary-row"><span class="salary-row-label">Lembur 1.5 Jam (1 Jam)</span><span class="salary-row-value" id="l15">0x (0 Jam)</span></div>
+            <div class="salary-row"><span class="salary-row-label">Lembur 2.5 Jam (2 Jam)</span><span class="salary-row-value" id="l25">0x (0 Jam)</span></div>
+            <div class="salary-row"><span class="salary-row-label">Lembur 4.5 Jam (3 Jam)</span><span class="salary-row-value" id="l45">0x (0 Jam)</span></div>
+            <div class="salary-row"><span class="salary-row-label">Lembur 5.5 Jam (4 Jam)</span><span class="salary-row-value" id="l55">0x (0 Jam)</span></div>
+            <div class="salary-divider"></div>
+            <div class="salary-total-row"><span class="salary-total-label">Total Keseluruhan</span><div class="salary-amount"><span id="totJamM">0</span> <span>Jam</span></div></div>
+        </div>
+    </div>
+</div>
 
-        rules_version = '2';
-        service cloud.firestore {
-          match /databases/{database}/documents {
-            match /users/{userId}/absensi/{docId} {
-              allow read, write: if request.auth != null && request.auth.uid == userId;
-            }
-          }
-        }
-
-     5. Project settings > General > scroll ke "Your apps" > tombol "</>"
-        untuk daftar web app, lalu copy config-nya ke firebaseConfig di bawah.
-     ══════════════════════════════════════════════════════════ -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script>
-    // GANTI dengan config dari project Firebase kamu sendiri
-    const firebaseConfig = {
-        apiKey:            "AIzaSyACr-Y_Sswjp4enHl8pKtHO1_q-6nclMS8",
-        authDomain:        "kehadiran-kerja.firebaseapp.com",
-        projectId:         "kehadiran-kerja",
-        storageBucket:     "kehadiran-kerja.firebasestorage.app",
-        messagingSenderId: "628568396399",
-        appId:             "1:628568396399:web:648db93c8a2db61da5339a"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const fbAuth = firebase.auth();
-    const fbDb   = firebase.firestore();
-
-    let currentUser = null;
-    let unsubscribeCloud = null;
-
-    function setSyncStatus(text, mode) {
-        const el = document.getElementById('syncStatus');
-        if(!el) return;
-        el.innerHTML = `<span class="dot"></span>${text}`;
-        el.classList.remove('online','error');
-        if(mode) el.classList.add(mode);
-    }
-
-    function handleAuthClick() {
-        if(currentUser) {
-            if(confirm('Logout dari akun Google?\nData tetap tersimpan di cloud.')) fbAuth.signOut();
-        } else {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            setSyncStatus('Menghubungkan...', null);
-            fbAuth.signInWithRedirect(provider);
-        }
-    }
-
-    fbAuth.getRedirectResult().catch(err => {
-        console.error('Redirect login error:', err);
-        setSyncStatus('Login gagal', 'error');
-        if(err.code === 'auth/unauthorized-domain') {
-            alert('Login gagal: domain ini belum diizinkan di Firebase.\n\nBuka Firebase Console > Authentication > Settings > Authorized domains, lalu tambahkan:\n' + window.location.hostname);
-        } else {
-            alert('Login gagal (' + err.code + '): ' + err.message);
-        }
-    });
-
-    fbAuth.onAuthStateChanged(user => {
-        currentUser = user;
-        const btn = document.getElementById('btnAuth');
-        if(user) {
-            btn.title = `Logout (${user.displayName || user.email})`;
-            subscribeCloudData(user.uid);
-        } else {
-            btn.title = 'Login Google';
-            if(unsubscribeCloud) { unsubscribeCloud(); unsubscribeCloud = null; }
-            setSyncStatus('Mode offline (belum login)', null);
-        }
-    });
-
-    function subscribeCloudData(uid) {
-        if(unsubscribeCloud) unsubscribeCloud();
-        unsubscribeCloud = fbDb.collection('users').doc(uid).collection('absensi')
-            .onSnapshot(snap => {
-                const cloudData = {};
-                snap.forEach(doc => { cloudData[doc.id] = doc.data(); });
-                appData = cloudData;
-                localStorage.setItem('absensiData', JSON.stringify(appData));
-                if(typeof renderCalendar === 'function') renderCalendar();
-                setSyncStatus(`Tersinkron • ${currentUser.displayName || currentUser.email}`, 'online');
-            }, err => {
-                console.error(err);
-                setSyncStatus('Gagal sinkron, cek koneksi', 'error');
-            });
-    }
-
-    function syncSaveToCloud(key, data) {
-        if(!currentUser) return;
-        fbDb.collection('users').doc(currentUser.uid).collection('absensi').doc(key)
-            .set(data)
-            .catch(err => {
-                console.error(err);
-                setSyncStatus('Gagal simpan ke cloud', 'error');
-            });
-    }
-
-    function syncDeleteAllCloud() {
-        if(!currentUser) return;
-        fbDb.collection('users').doc(currentUser.uid).collection('absensi').get()
-            .then(snap => {
-                const batch = fbDb.batch();
-                snap.forEach(doc => batch.delete(doc.ref));
-                return batch.commit();
-            })
-            .catch(err => console.error(err));
-    }
-</script>
+<!-- TEMPLATE PDF SLIP GAJI (Hidden) -->
+<div id="pdf-template">
+    <div class="pdf-header">
+        <h1>SLIP GAJI KARYAWAN</h1>
+        <p id="pdfPeriode">Periode: -</p>
+    </div>
+    <hr style="margin-bottom: 30px;">
+    <div class="pdf-info">
+        <div><p><strong>Nama:</strong> Adrian Maulana</p><p><strong>Posisi:</strong> Karyawan</p></div>
+        <div style="text-align: right;"><p><strong>Total Kehadiran:</strong> <span id="pdfHadirHari">0</span> Hari</p><p><strong>Total Lembur:</strong> <span id="pdfLemburJam">0</span> Jam</p></div>
+    </div>
+    <table class="pdf-table">
+        <tr><th>Deskripsi Pendapatan</th><th style="text-align: right;">Nominal (Rp)</th></tr>
+        <tr><td>Gaji Pokok (@ 272.900 x <span id="pdfGajiHadirCount">0</span> hari)</td><td style="text-align: right;" id="pdfGajiPokokVal">0</td></tr>
+        <tr><td>Total Uang Lemburan</td><td style="text-align: right;" id="pdfGajiLemburVal">0</td></tr>
+        <tr style="background-color: #ecf0f1; font-weight: bold;"><td>TOTAL DITERIMA</td><td style="text-align: right;" id="pdfGajiTotalVal">0</td></tr>
+    </table>
+    <div class="pdf-footer">Dicetak secara otomatis oleh Sistem Kehadiran Kerja pada <span id="pdfTanggalCetak"></span></div>
+</div>
 
 <script>
     let appData = JSON.parse(localStorage.getItem('absensiData')) || {};
-    let activeKey = "", currentPhotoIn = "", currentPhotoOut = "";
-    let currentLembur = 0;
+    let activeKey = "", currentLembur = 0;
+    let currentLat = null, currentLng = null;
+    let isAnimating = false;
 
     const LEMBUR_RATES    = {0:0, 1:49689,  2:82815,  3:149067, 4:182193};
     const LEMBUR_DURATION = {0:0, 1:1.5,    2:2.5,    3:4.5,    4:5.5};
-
     const monthsName  = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
     const monthsShort = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agt","Sep","Okt","Nov","Des"];
 
     const monthSelect = document.getElementById('monthSelect');
     const yearSelect  = document.getElementById('yearSelect');
-    const statusSelect= document.getElementById('statusSelect');
-    const lemburSelect= document.getElementById('lemburSelect');
-    const saveBtn     = document.getElementById('saveBtn');
-    const wrapper     = document.getElementById('calendar-wrapper');
-
     monthsName.forEach((m,i) => monthSelect.options.add(new Option(m,i)));
     for(let y=2026; y<=2050; y++) yearSelect.options.add(new Option(y,y));
 
@@ -1241,252 +422,283 @@
     monthSelect.value = savedView.month ?? new Date().getMonth();
     yearSelect.value  = savedView.year  ?? new Date().getFullYear();
 
+    function toggleTheme() {
+        document.body.classList.toggle('dark-theme');
+        const isDark = document.body.classList.contains('dark-theme');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.getElementById('iconSun').innerHTML = isDark 
+            ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>' 
+            : '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    }
+    if (localStorage.getItem('theme') === 'dark') { toggleTheme(); }
+
+    function enableNotifications() {
+        if (!("Notification" in window)) { alert("Browser Anda tidak mendukung notifikasi."); } 
+        else if (Notification.permission === "granted") { alert("Pengingat absensi sudah aktif!"); testNotification(); } 
+        else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then(permission => { if (permission === "granted") { alert("Pengingat berhasil diaktifkan!"); testNotification(); } });
+        }
+    }
+    function testNotification() { new Notification("Pengingat Absensi Aktif!", { body: "Aplikasi akan memantau waktu absen.", icon: "https://cdn-icons-png.flaticon.com/512/2907/2907150.png" }); }
+
+    function dapatkanLokasi() {
+        const stat = document.getElementById('locStatus');
+        if (navigator.geolocation) {
+            stat.innerText = "Mencari koordinat...";
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    currentLat = pos.coords.latitude; currentLng = pos.coords.longitude;
+                    stat.innerHTML = `<a href="https://maps.google.com/?q=${currentLat},${currentLng}" target="_blank">📍 Lihat di Maps (${currentLat.toFixed(4)}, ${currentLng.toFixed(4)})</a>`;
+                },
+                (err) => { stat.innerText = "Gagal mendapatkan lokasi."; }
+            );
+        } else { stat.innerText = "GPS tidak didukung browser."; }
+    }
+
+    function generatePDF() {
+        const el = document.getElementById('pdf-template');
+        document.getElementById('pdfPeriode').innerText = "Periode: " + document.getElementById('periodeGaji').innerText;
+        document.getElementById('pdfHadirHari').innerText = document.getElementById('detHadirGaji').innerText;
+        
+        // Di PDF, tampilkan total jam lembur yang dibayar (bulan lalu)
+        let m = parseInt(monthSelect.value), y = parseInt(yearSelect.value);
+        let prevMonth = m - 1; let prevYear = y;
+        if (prevMonth < 0) { prevMonth = 11; prevYear = y - 1; }
+        let lastDayPrevMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
+        let lemburJamBulanLalu = 0;
+        for(let i = 1; i <= lastDayPrevMonth; i++){
+            let d = appData[`${prevYear}-${prevMonth}-${i}`];
+            if(d?.lembur) lemburJamBulanLalu += LEMBUR_DURATION[d.lembur];
+        }
+        document.getElementById('pdfLemburJam').innerText = lemburJamBulanLalu;
+        
+        document.getElementById('pdfGajiHadirCount').innerText = document.getElementById('detHadirGaji').innerText;
+        document.getElementById('pdfGajiPokokVal').innerText = document.getElementById('gajiPokokVal').innerText;
+        document.getElementById('pdfGajiLemburVal').innerText = document.getElementById('totalLemburVal').innerText;
+        document.getElementById('pdfGajiTotalVal').innerText = document.getElementById('totalGaji').innerText;
+        
+        const now = new Date();
+        document.getElementById('pdfTanggalCetak').innerText = `${now.getDate()} ${monthsName[now.getMonth()]} ${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`;
+
+        const opt = { margin: 10, filename: `Slip_Gaji_${monthsName[monthSelect.value]}_${yearSelect.value}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+        html2pdf().set(opt).from(el).save();
+    }
+
     function setPill(val) {
-        document.querySelectorAll('.status-pill').forEach(p => {
-            p.className = 'status-pill' + (p.dataset.val===val ? ` active-${val}` : '');
-        });
-        statusSelect.value = val;
+        document.querySelectorAll('.status-pill').forEach(p => p.className = 'status-pill' + (p.dataset.val===val ? ` active-${val}` : ''));
+        document.getElementById('statusSelect').value = val;
         checkValidation();
     }
-    function clearPills() {
-        document.querySelectorAll('.status-pill').forEach(p => p.className='status-pill');
-        statusSelect.value = ""; checkValidation();
-    }
+    function clearPills() { document.querySelectorAll('.status-pill').forEach(p => p.className='status-pill'); document.getElementById('statusSelect').value = ""; checkValidation(); }
+    
     function setLembur(val) {
-        currentLembur = val;
-        lemburSelect.value = val;
-        document.querySelectorAll('.lembur-pill').forEach(p => {
-            p.classList.toggle('active-lembur', parseInt(p.dataset.val) === val);
-        });
+        currentLembur = val; document.getElementById('lemburSelect').value = val;
+        document.querySelectorAll('.lembur-pill').forEach(p => p.classList.toggle('active-lembur', parseInt(p.dataset.val) === val));
         const info = document.getElementById('lemburInfo');
-        if(val === 0) {
-            info.textContent = 'Tidak ada lembur';
-            info.classList.remove('has-lembur');
-        } else {
-            const durasi = LEMBUR_DURATION[val];
-            const bayar  = LEMBUR_RATES[val];
-            info.textContent = `Lembur ${val} Jam → dihitung ${durasi} Jam = Rp ${bayar.toLocaleString('id-ID')}`;
-            info.classList.add('has-lembur');
+        if(val === 0) { info.textContent = 'Tidak ada lembur'; info.style.color = "var(--text-sub)"; } 
+        else {
+            const d = LEMBUR_DURATION[val], b = LEMBUR_RATES[val];
+            info.textContent = `Dihitung ${d} Jam = Rp ${b.toLocaleString('id-ID')}`;
+            info.style.color = "var(--accent)";
         }
     }
-    function checkValidation() {
-        const ok = statusSelect.value !== "";
-        saveBtn.disabled = !ok;
-        saveBtn.classList.toggle('can-save', ok);
+    function checkValidation() { 
+        const ok = document.getElementById('statusSelect').value !== ""; 
+        document.getElementById('saveBtn').disabled = !ok; 
+        document.getElementById('saveBtn').classList.toggle('can-save', ok); 
     }
 
-    function updatePhotoUI(type) {
-        const data = type==='In' ? currentPhotoIn : currentPhotoOut;
-        const box  = document.getElementById(`box${type}`);
-        const img  = document.getElementById(`img${type}`);
-        const ph   = document.getElementById(`ph${type}`);
-        if(data) {
-            img.src=data; img.style.display='block'; ph.style.display='none';
-            box.classList.add('has-photo');
-        } else {
-            img.src=""; img.style.display='none'; ph.style.display='flex';
-            box.classList.remove('has-photo');
-            document.getElementById(`file${type}`).value="";
-        }
-    }
-    function removePhoto(type) {
-        if(type==='In') currentPhotoIn=""; else currentPhotoOut="";
-        updatePhotoUI(type);
-    }
-    function handlePhoto(e, type) {
-        const file=e.target.files[0]; if(!file) return;
-        const reader=new FileReader();
-        reader.onload=function(evt){
-            const im=new Image();
-            im.onload=function(){
-                const canvas=document.createElement('canvas');
-                const MAX_W=800, scale=MAX_W/im.width;
-                canvas.width=MAX_W; canvas.height=im.height*scale;
-                const ctx=canvas.getContext('2d');
-                ctx.drawImage(im,0,0,canvas.width,canvas.height);
-                ctx.font="bold 36px 'Space Mono',monospace";
-                ctx.fillStyle="white"; ctx.strokeStyle="black"; ctx.lineWidth=4;
-                const ts=new Date().toLocaleString('id-ID');
-                ctx.strokeText(ts,18,canvas.height-24);
-                ctx.fillText(ts,18,canvas.height-24);
-                const url=canvas.toDataURL('image/jpeg',0.65);
-                if(type==='In') currentPhotoIn=url; else currentPhotoOut=url;
-                updatePhotoUI(type);
-            };
-            im.src=evt.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-    function openPreview(type) {
-        const src=type==='In'?currentPhotoIn:currentPhotoOut;
-        if(src){ document.getElementById('previewImageFull').src=src; document.getElementById('previewModal').classList.add('active'); }
-    }
-    function closePreview() {
-        document.getElementById('previewModal').classList.remove('active');
-        setTimeout(()=>document.getElementById('previewImageFull').src="",200);
-    }
+    let startX = 0;
+    const swipeArea = document.getElementById('calendar-wrapper');
 
-    // ── SWIPE ──
-    let startX=0, isAnimating=false;
-    wrapper.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; },{passive:true});
-    wrapper.addEventListener('touchend', e=>{
-        if(isAnimating) return;
-        const diff=e.changedTouches[0].clientX-startX;
-        if(diff<-50) changeMonth(1); else if(diff>50) changeMonth(-1);
+    swipeArea.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+    swipeArea.addEventListener('touchend', (e) => {
+        if (isAnimating) return;
+        let diff = e.changedTouches[0].clientX - startX;
+        if (diff < -50) triggerMonthChange(1);
+        else if (diff > 50) triggerMonthChange(-1);
     });
 
-    // ── SMOOTH MONTH CHANGE ──
-    function changeMonth(dir) {
-        if(isAnimating && dir!==0) return;
-        if(dir!==0) {
-            isAnimating=true;
-            const outX = dir===1 ? '-60px' : '60px';
-            wrapper.style.transition='transform 0.22s cubic-bezier(0.4,0,0.8,1), opacity 0.2s';
-            wrapper.style.transform=`translateX(${outX})`;
-            wrapper.style.opacity='0';
+    function triggerMonthChange(dir) {
+        if(isAnimating && dir !== 0) return;
+        if(dir !== 0) {
+            isAnimating = true;
+            const slider = document.getElementById('calendar-slider');
+            const label = document.getElementById('monthDisplay');
+            const outX = dir === 1 ? '-60px' : '60px';
+            
+            slider.style.transition = 'transform 0.22s cubic-bezier(0.4,0,0.8,1), opacity 0.2s';
+            slider.style.transform = `translateX(${outX})`;
+            slider.style.opacity = '0';
+            label.style.transition = 'transform 0.2s, opacity 0.2s';
+            label.style.transform = `translateX(${outX})`;
+            label.style.opacity = '0';
 
-            // also animate month label
-            const label=document.getElementById('monthDisplay');
-            label.style.transition='transform 0.2s, opacity 0.2s';
-            label.style.transform=`translateX(${outX})`;
-            label.style.opacity='0';
-
-            setTimeout(()=>{
-                let m=parseInt(monthSelect.value)+dir;
-                if(m<0){m=11;yearSelect.value--;} else if(m>11){m=0;yearSelect.value++;}
-                monthSelect.value=m;
+            setTimeout(() => {
+                let m = parseInt(monthSelect.value) + dir;
+                if(m < 0) { m = 11; yearSelect.value--; } else if(m > 11) { m = 0; yearSelect.value++; }
+                monthSelect.value = m;
                 renderCalendar();
 
-                const inX = dir===1 ? '60px' : '-60px';
-                wrapper.style.transition='none';
-                wrapper.style.transform=`translateX(${inX})`;
-                wrapper.style.opacity='0';
-                label.style.transform=`translateX(${inX})`;
-                label.style.opacity='0';
-                void wrapper.offsetWidth;
+                const inX = dir === 1 ? '60px' : '-60px';
+                slider.style.transition = 'none';
+                slider.style.transform = `translateX(${inX})`;
+                slider.style.opacity = '0';
+                label.style.transform = `translateX(${inX})`;
+                label.style.opacity = '0';
+                void slider.offsetWidth;
 
-                wrapper.style.transition='transform 0.3s cubic-bezier(0.34,1.1,0.64,1), opacity 0.25s';
-                wrapper.style.transform='translateX(0)';
-                wrapper.style.opacity='1';
-                label.style.transition='transform 0.3s cubic-bezier(0.34,1.1,0.64,1), opacity 0.25s';
-                label.style.transform='translateX(0)';
-                label.style.opacity='1';
-                setTimeout(()=>{ isAnimating=false; },300);
-            },220);
+                slider.style.transition = 'transform 0.3s cubic-bezier(0.34,1.1,0.64,1), opacity 0.25s';
+                slider.style.transform = 'translateX(0)';
+                slider.style.opacity = '1';
+                label.style.transition = 'transform 0.3s cubic-bezier(0.34,1.1,0.64,1), opacity 0.25s';
+                label.style.transform = 'translateX(0)';
+                label.style.opacity = '1';
+                
+                setTimeout(() => { isAnimating = false; }, 300);
+            }, 220);
         } else {
             renderCalendar();
         }
     }
 
     function renderCalendar() {
-        const cal=document.getElementById('calendar');
-        cal.innerHTML='';
-        const m=parseInt(monthSelect.value), y=parseInt(yearSelect.value);
-        const firstDay=new Date(y,m,1).getDay();
-        const totalDays=new Date(y,m+1,0).getDate();
+        const cal = document.getElementById('calendar'); cal.innerHTML = '';
+        const m = parseInt(monthSelect.value), y = parseInt(yearSelect.value);
+        const firstDay = new Date(y,m,1).getDay(), totalDays = new Date(y,m+1,0).getDate();
 
-        document.getElementById('monthDisplay').textContent=monthsName[m];
-        document.getElementById('yearDisplay').textContent=y;
+        document.getElementById('monthDisplay').textContent = monthsName[m];
+        document.getElementById('yearDisplay').textContent = y;
         localStorage.setItem('absensiView', JSON.stringify({month:m, year:y}));
 
-        for(let e=0;e<firstDay;e++){
-            const empty=document.createElement('div');
-            empty.className='date-empty'; cal.appendChild(empty);
-        }
+        for(let e=0;e<firstDay;e++){ cal.innerHTML += `<div class="date-empty"></div>`; }
         for(let i=1;i<=totalDays;i++){
-            const key=`${y}-${m}-${i}`, data=appData[key];
-            const div=document.createElement('div');
-            div.className='date-box'+(data?` status-${data.status}`:'');
-            if(data?.lembur>0 || data?.keterangan?.trim()) div.classList.add('has-note');
-            div.style.animationDelay=`${(i-1)*0.018}s`;
-            div.innerHTML=`${i}<div class="note-dot"></div>`;
-            div.onclick=()=>openModal(key,i,m,y);
-            cal.appendChild(div);
+            const key = `${y}-${m}-${i}`, data = appData[key];
+            let cls = 'date-box' + (data ? ` status-${data.status}` : '');
+            let dot = (data?.lembur>0 || data?.keterangan?.trim() || data?.lat) ? '<div class="note-dot"></div>' : '';
+            cal.innerHTML += `<div class="${cls}" onclick="openModal('${key}',${i},${m},${y})">${i}${dot}</div>`;
         }
         updateStats(m,y);
     }
 
     function openModal(key,day,m,y) {
-        activeKey=key;
-        const data=appData[key];
-        document.getElementById('modalDate').textContent=`${day} ${monthsName[m]} ${y}`;
+        activeKey = key; const data = appData[key];
+        document.getElementById('modalDate').textContent = `${day} ${monthsName[m]} ${y}`;
         if(data?.status) setPill(data.status); else clearPills();
-        const jm=document.getElementById('jamMasuk'), jk=document.getElementById('jamKeluar');
-        jm.value=data?.masuk||""; jk.value=data?.keluar||"";
-        jm.classList.toggle('empty-time',!jm.value);
-        jk.classList.toggle('empty-time',!jk.value);
+        document.getElementById('jamMasuk').value = data?.masuk||"";
+        document.getElementById('jamKeluar').value = data?.keluar||"";
         setLembur(data?.lembur||0);
-        document.getElementById('keterangan').value=data?.keterangan||"";
-        currentPhotoIn=data?.photoIn||""; currentPhotoOut=data?.photoOut||"";
-        updatePhotoUI('In'); updatePhotoUI('Out');
-        checkValidation();
-        document.getElementById('modal').classList.add('active');
-    }
+        document.getElementById('keterangan').value = data?.keterangan||"";
+        
+        currentLat = data?.lat || null; currentLng = data?.lng || null;
+        if(currentLat) document.getElementById('locStatus').innerHTML = `<a href="https://maps.google.com/?q=${currentLat},${currentLng}" target="_blank">📍 Lokasi Tersimpan</a>`;
+        else document.getElementById('locStatus').innerText = "Belum direkam";
 
-    function handleOverlayClick(e) {
-        if(e.target===document.getElementById('modal')) closeModal();
+        checkValidation(); document.getElementById('modal').classList.add('active');
     }
 
     function closeModal() {
-        const overlay=document.getElementById('modal');
-        overlay.classList.add('closing');
+        const overlay = document.getElementById('modal'); overlay.classList.add('closing');
         setTimeout(()=>{ overlay.classList.remove('active','closing'); },280);
     }
 
+    function openHadirDetail() { document.getElementById('hadirModal').classList.add('active'); }
+    function openLemburDetail() { document.getElementById('lemburModal').classList.add('active'); }
+
     function saveData() {
-        appData[activeKey]={
-            status:  statusSelect.value,
+        appData[activeKey] = {
+            status:  document.getElementById('statusSelect').value,
             masuk:   document.getElementById('jamMasuk').value,
             keluar:  document.getElementById('jamKeluar').value,
             lembur:  currentLembur,
             lemburBayaran: LEMBUR_RATES[currentLembur],
             keterangan: document.getElementById('keterangan').value,
-            photoIn: currentPhotoIn, photoOut: currentPhotoOut
+            lat: currentLat, lng: currentLng
         };
         localStorage.setItem('absensiData',JSON.stringify(appData));
-        syncSaveToCloud(activeKey, appData[activeKey]);
         renderCalendar(); closeModal();
     }
 
     function updateStats(m,y) {
-        let t={Hadir:0,Libur:0,Sakit:0,Izin:0};
-        const total=new Date(y,m+1,0).getDate();
-        for(let i=1;i<=total;i++){
-            const k=`${y}-${m}-${i}`;
-            if(appData[k]?.status) t[appData[k].status]++;
-        }
-        document.getElementById('totalHadir').textContent=t.Hadir;
-        document.getElementById('totalLibur').textContent=t.Libur;
-        document.getElementById('totalSakit').textContent=t.Sakit;
-        document.getElementById('totalIzin').textContent=t.Izin;
-        let hadir=0, lemburTotal=0;
-        const start=new Date(y,m-1,16), end=new Date(y,m,15);
-        for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
-            const k=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-            if(appData[k]?.status==='Hadir') hadir++;
-        }
-        // Lembur dibayarkan bulan berikutnya: lembur Juli (1-31) cair di gajian Agustus, dst.
-        const prevRef  = new Date(y, m-1, 1);
-        const prevY    = prevRef.getFullYear();
-        const prevM    = prevRef.getMonth();
-        const prevTotal= new Date(prevY, prevM+1, 0).getDate();
-        for(let i=1;i<=prevTotal;i++){
-            const k=`${prevY}-${prevM}-${i}`;
-            if(appData[k]?.lemburBayaran) lemburTotal += appData[k].lemburBayaran;
-        }
-        const gajiPokok = hadir*272900;
-        const totalSemua = gajiPokok + lemburTotal;
-        document.getElementById('gajiPokokVal').textContent=gajiPokok.toLocaleString('id-ID');
-        document.getElementById('totalLemburVal').textContent=lemburTotal.toLocaleString('id-ID');
-        document.getElementById('totalGaji').textContent=totalSemua.toLocaleString('id-ID');
-        document.getElementById('periodeGaji').textContent=`16 ${monthsShort[start.getMonth()]} – 15 ${monthsShort[end.getMonth()]}`;
-        document.getElementById('lemburLabel').textContent=`Lemburan (1–${prevTotal} ${monthsName[prevM]})`;
-    }
+        // ── 1. HITUNG KEHADIRAN (PERIODE 16 BULAN LALU s/d 15 BULAN INI) ──
+        let hadirGaji = 0, liburGaji = 0, sakitGaji = 0, izinGaji = 0;
+        let startGaji = new Date(y, m - 1, 16);
+        let endGaji = new Date(y, m, 15);
 
-    function resetAllData() {
-        if(confirm("Reset SEMUA data absensi?\nTidak bisa dibatalkan.")) {
-            appData={}; localStorage.removeItem('absensiData'); syncDeleteAllCloud(); renderCalendar();
+        for(let d = new Date(startGaji); d <= endGaji; d.setDate(d.getDate() + 1)){ 
+            let k = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+            let data = appData[k];
+            if(data?.status === 'Hadir') hadirGaji++;
+            if(data?.status === 'Libur') liburGaji++;
+            if(data?.status === 'Sakit') sakitGaji++;
+            if(data?.status === 'Izin')  izinGaji++;
         }
+
+        // Tampilkan ke Kotak Stat Atas (Hadir & Libur sesuai periode 16-15)
+        document.getElementById('totalHadir').textContent = hadirGaji;
+        document.getElementById('totalLibur').textContent = liburGaji;
+
+        // Tampilkan ke Modal Rincian Kehadiran
+        document.getElementById('detHadir').textContent = hadirGaji + " Hari"; 
+        document.getElementById('detLibur').textContent = liburGaji + " Hari";
+        document.getElementById('detSakit').textContent = sakitGaji + " Hari"; 
+        document.getElementById('detIzin').textContent  = izinGaji + " Hari";
+        document.getElementById('detHadirGaji').textContent = hadirGaji;
+
+        // ── 2. HITUNG LEMBURAN (UNTUK KOTAK ATAS & MODAL: BULAN AKTIF 1-31) ──
+        let c15 = 0, c25 = 0, c45 = 0, c55 = 0;
+        let lemburJamAktif = 0;
+        let totalDaysActive = new Date(y, m + 1, 0).getDate();
+
+        for(let i = 1; i <= totalDaysActive; i++){
+            let k = `${y}-${m}-${i}`;
+            let d = appData[k];
+            if(d?.lembur) {
+                lemburJamAktif += LEMBUR_DURATION[d.lembur];
+                if(d.lembur===1) c15++; 
+                if(d.lembur===2) c25++; 
+                if(d.lembur===3) c45++; 
+                if(d.lembur===4) c55++;
+            }
+        }
+
+        // Tampilkan ke Kotak Stat Atas (Bulan Berjalan)
+        document.getElementById('totalJamLembur').textContent = lemburJamAktif;
+
+        // Tampilkan ke Modal Rincian Lemburan (Bulan Berjalan)
+        document.getElementById('l15').textContent = `${c15}x (${c15*1.5} Jam)`; 
+        document.getElementById('l25').textContent = `${c25}x (${c25*2.5} Jam)`;
+        document.getElementById('l45').textContent = `${c45}x (${c45*4.5} Jam)`; 
+        document.getElementById('l55').textContent = `${c55}x (${c55*5.5} Jam)`;
+        document.getElementById('totJamM').textContent = lemburJamAktif;
+
+        // ── 3. HITUNG NOMINAL UANG LEMBUR (UNTUK GAJI: BULAN LALU) ──
+        let prevMonth = m - 1;
+        let prevYear = y;
+        if (prevMonth < 0) {
+            prevMonth = 11;
+            prevYear = y - 1;
+        }
+        let lastDayPrevMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
+        let lemburUangTotalBulanLalu = 0;
+
+        for(let i = 1; i <= lastDayPrevMonth; i++){
+            let k = `${prevYear}-${prevMonth}-${i}`;
+            let d = appData[k];
+            if(d?.lemburBayaran) lemburUangTotalBulanLalu += d.lemburBayaran;
+        }
+
+        // ── 4. TAMPILAN KARTU ESTIMASI GAJI ──
+        const gajiPokok = hadirGaji * 272900;
+        document.getElementById('gajiPokokVal').textContent = gajiPokok.toLocaleString('id-ID');
+        document.getElementById('totalLemburVal').textContent = lemburUangTotalBulanLalu.toLocaleString('id-ID');
+        document.getElementById('totalGaji').textContent = (gajiPokok + lemburUangTotalBulanLalu).toLocaleString('id-ID');
+        
+        // Teks Periode
+        const pStart = `16 ${monthsShort[startGaji.getMonth()]}`;
+        const pEnd = `15 ${monthsShort[endGaji.getMonth()]}`;
+        document.getElementById('periodeGaji').textContent = `${pStart} – ${pEnd}`;
+        document.getElementById('lemburLabel').textContent = `Lemburan (1–${lastDayPrevMonth} ${monthsShort[prevMonth]})`;
     }
 
     renderCalendar();
