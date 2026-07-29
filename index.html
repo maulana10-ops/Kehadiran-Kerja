@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Absensi Kerja Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Library untuk Generate PDF Slip Gaji -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- Library Firebase SDK (Versi Kompatibel untuk integrasi langsung) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -234,11 +241,14 @@
             <button class="btn-act glass" onclick="toggleTheme()" title="Ubah Tema" id="btnTheme">
                 <svg viewBox="0 0 24 24" id="iconSun"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             </button>
+            <!-- Tombol Auth Firebase -->
             <button class="btn-act glass" id="btnAuth" onclick="handleAuthClick()" title="Login Firebase" style="color:var(--accent);">
                 <svg viewBox="0 0 24 24"><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
             </button>
         </div>
     </div>
+    
+    <!-- Status Sinkronisasi Firebase -->
     <div class="sync-status" id="syncStatus"><span class="dot"></span>Mode offline</div>
 
     <select id="monthSelect"></select> <select id="yearSelect"></select>
@@ -257,10 +267,8 @@
 
     <!-- STATS ROW -->
     <div class="stats-row">
-        <!-- Hadir & Libur: Periode Gaji (16-15) -->
         <div class="stat-chip glass hadir" onclick="openHadirDetail()"><span class="stat-num" id="totalHadir">0</span><span class="stat-label">Hadir</span></div>
         <div class="stat-chip glass libur"><span class="stat-num" id="totalLibur">0</span><span class="stat-label">Libur</span></div>
-        <!-- Lemburan: Bulan Berjalan (1-31) -->
         <div class="stat-chip glass lembur" onclick="openLemburDetail()"><span class="stat-num" id="totalJamLembur">0</span><span class="stat-label">Lemburan (Jam)</span></div>
     </div>
 
@@ -403,6 +411,81 @@
 </div>
 
 <script>
+    // ============================================
+    // 1. KONFIGURASI & INISIALISASI FIREBASE
+    // ============================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyACr-Y_Sswjp4enHl8pKtHO1_q-6nclMS8",
+      authDomain: "kehadiran-kerja.firebaseapp.com",
+      projectId: "kehadiran-kerja",
+      storageBucket: "kehadiran-kerja.firebasestorage.app",
+      messagingSenderId: "628568396399",
+      appId: "1:628568396399:web:648db93c8a2db61da5339a",
+      measurementId: "G-9WGG81JQQH"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    const db = firebase.database();
+    let currentUser = null;
+
+    // ============================================
+    // 2. LOGIKA LOGIN & SINKRONISASI
+    // ============================================
+    auth.onAuthStateChanged(user => {
+        currentUser = user;
+        const btnAuth = document.getElementById('btnAuth');
+        const syncStatus = document.getElementById('syncStatus');
+        
+        if (user) {
+            // UI saat Login
+            btnAuth.style.color = "var(--libur)";
+            btnAuth.title = "Logout";
+            btnAuth.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+            
+            syncStatus.innerHTML = '<span class="dot"></span>Sinkronasi aktif';
+            syncStatus.classList.add('online');
+            
+            // Mengambil & Mencocokkan data dari Cloud Firebase
+            db.ref('users/' + user.uid + '/absensiData').once('value').then(snapshot => {
+                const cloudData = snapshot.val();
+                if (cloudData) {
+                    appData = cloudData;
+                    localStorage.setItem('absensiData', JSON.stringify(appData));
+                    renderCalendar();
+                } else {
+                    // Kalau di cloud kosong, backup data lokal ke cloud
+                    db.ref('users/' + user.uid + '/absensiData').set(appData);
+                }
+            }).catch(err => console.error("Gagal menarik data:", err));
+
+        } else {
+            // UI saat Logout (Offline Mode)
+            btnAuth.style.color = "var(--accent)";
+            btnAuth.title = "Login Firebase";
+            btnAuth.innerHTML = '<svg viewBox="0 0 24 24"><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>';
+            
+            syncStatus.innerHTML = '<span class="dot"></span>Mode offline';
+            syncStatus.classList.remove('online');
+        }
+    });
+
+    function handleAuthClick() {
+        if (currentUser) {
+            if (confirm("Apakah Anda yakin ingin logout? Data tidak akan disinkronisasi ke cloud selama logout.")) {
+                auth.signOut();
+            }
+        } else {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(err => alert("Gagal login: " + err.message));
+        }
+    }
+
+    // ============================================
+    // 3. VARIABEL APLIKASI
+    // ============================================
     let appData = JSON.parse(localStorage.getItem('absensiData')) || {};
     let activeKey = "", currentLembur = 0;
     let currentLat = null, currentLng = null;
@@ -422,6 +505,9 @@
     monthSelect.value = savedView.month ?? new Date().getMonth();
     yearSelect.value  = savedView.year  ?? new Date().getFullYear();
 
+    // ============================================
+    // 4. UI & FUNGSI UMUM (Tema, PDF, Notif, GPS)
+    // ============================================
     function toggleTheme() {
         document.body.classList.toggle('dark-theme');
         const isDark = document.body.classList.contains('dark-theme');
@@ -460,7 +546,6 @@
         document.getElementById('pdfPeriode').innerText = "Periode: " + document.getElementById('periodeGaji').innerText;
         document.getElementById('pdfHadirHari').innerText = document.getElementById('detHadirGaji').innerText;
         
-        // Di PDF, tampilkan total jam lembur yang dibayar (bulan lalu)
         let m = parseInt(monthSelect.value), y = parseInt(yearSelect.value);
         let prevMonth = m - 1; let prevYear = y;
         if (prevMonth < 0) { prevMonth = 11; prevYear = y - 1; }
@@ -484,6 +569,9 @@
         html2pdf().set(opt).from(el).save();
     }
 
+    // ============================================
+    // 5. KALENDER & INPUT MODAL
+    // ============================================
     function setPill(val) {
         document.querySelectorAll('.status-pill').forEach(p => p.className = 'status-pill' + (p.dataset.val===val ? ` active-${val}` : ''));
         document.getElementById('statusSelect').value = val;
@@ -510,7 +598,6 @@
 
     let startX = 0;
     const swipeArea = document.getElementById('calendar-wrapper');
-
     swipeArea.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
     swipeArea.addEventListener('touchend', (e) => {
         if (isAnimating) return;
@@ -606,6 +693,7 @@
     function openLemburDetail() { document.getElementById('lemburModal').classList.add('active'); }
 
     function saveData() {
+        // Simpan data di local storage
         appData[activeKey] = {
             status:  document.getElementById('statusSelect').value,
             masuk:   document.getElementById('jamMasuk').value,
@@ -616,9 +704,20 @@
             lat: currentLat, lng: currentLng
         };
         localStorage.setItem('absensiData',JSON.stringify(appData));
-        renderCalendar(); closeModal();
+        
+        // Push pembaruan ke Database Cloud Firebase (Jika Login)
+        if (currentUser) {
+            db.ref('users/' + currentUser.uid + '/absensiData').set(appData)
+              .catch(err => console.error("Gagal sinkronisasi data:", err));
+        }
+
+        renderCalendar(); 
+        closeModal();
     }
 
+    // ============================================
+    // 6. PERHITUNGAN AKURAT GAJI & LEMBUR
+    // ============================================
     function updateStats(m,y) {
         // ── 1. HITUNG KEHADIRAN (PERIODE 16 BULAN LALU s/d 15 BULAN INI) ──
         let hadirGaji = 0, liburGaji = 0, sakitGaji = 0, izinGaji = 0;
@@ -634,11 +733,9 @@
             if(data?.status === 'Izin')  izinGaji++;
         }
 
-        // Tampilkan ke Kotak Stat Atas (Hadir & Libur sesuai periode 16-15)
         document.getElementById('totalHadir').textContent = hadirGaji;
         document.getElementById('totalLibur').textContent = liburGaji;
 
-        // Tampilkan ke Modal Rincian Kehadiran
         document.getElementById('detHadir').textContent = hadirGaji + " Hari"; 
         document.getElementById('detLibur').textContent = liburGaji + " Hari";
         document.getElementById('detSakit').textContent = sakitGaji + " Hari"; 
@@ -662,10 +759,8 @@
             }
         }
 
-        // Tampilkan ke Kotak Stat Atas (Bulan Berjalan)
         document.getElementById('totalJamLembur').textContent = lemburJamAktif;
 
-        // Tampilkan ke Modal Rincian Lemburan (Bulan Berjalan)
         document.getElementById('l15').textContent = `${c15}x (${c15*1.5} Jam)`; 
         document.getElementById('l25').textContent = `${c25}x (${c25*2.5} Jam)`;
         document.getElementById('l45').textContent = `${c45}x (${c45*4.5} Jam)`; 
@@ -675,10 +770,7 @@
         // ── 3. HITUNG NOMINAL UANG LEMBUR (UNTUK GAJI: BULAN LALU) ──
         let prevMonth = m - 1;
         let prevYear = y;
-        if (prevMonth < 0) {
-            prevMonth = 11;
-            prevYear = y - 1;
-        }
+        if (prevMonth < 0) { prevMonth = 11; prevYear = y - 1; }
         let lastDayPrevMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
         let lemburUangTotalBulanLalu = 0;
 
@@ -694,7 +786,6 @@
         document.getElementById('totalLemburVal').textContent = lemburUangTotalBulanLalu.toLocaleString('id-ID');
         document.getElementById('totalGaji').textContent = (gajiPokok + lemburUangTotalBulanLalu).toLocaleString('id-ID');
         
-        // Teks Periode
         const pStart = `16 ${monthsShort[startGaji.getMonth()]}`;
         const pEnd = `15 ${monthsShort[endGaji.getMonth()]}`;
         document.getElementById('periodeGaji').textContent = `${pStart} – ${pEnd}`;
