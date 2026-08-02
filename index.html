@@ -148,7 +148,7 @@
         .date-box.status-Sakit { background: var(--sakit-bg); border-color: var(--sakit-gl); color: var(--sakit); box-shadow: 0 3px 12px var(--sakit-gl); }
         .date-box.status-Izin { background: var(--izin-bg); border-color: var(--izin-gl); color: var(--izin); box-shadow: 0 3px 12px var(--izin-gl); }
         
-        /* Indikator baru (Ikon Lembur dan Notes) */
+        /* Indikator Lembur dan Notes */
         .indicators { position: absolute; top: 3px; right: 4px; display: flex; gap: 2px; font-size: 0.65rem; pointer-events: none; }
         
         .salary-card { border-radius: 22px; padding: 20px 22px; position: relative; overflow: hidden; }
@@ -204,8 +204,15 @@
         .lembur-pill.active-lembur { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); transform: scale(1.04); }
         .lembur-info { margin-top: 10px; font-family: 'Space Mono', monospace; font-size: 0.78rem; font-weight: 700; color: var(--text-sub); text-align: center; padding: 10px; border-radius: 12px; background: var(--input-bg); border: 1.5px solid rgba(150,150,150,0.2); }
         
-        .btn-save { width: 100%; background: linear-gradient(135deg, var(--accent) 0%, #a29bfe 100%); border: none; color: white; padding: 17px; border-radius: 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 22px; transition: 0.2s; opacity: 0.38; }
-        .btn-save.can-save { opacity: 1; } .btn-save.can-save:active { transform: scale(0.97); }
+        /* Tombol Aksi */
+        .btn-save { width: 100%; background: linear-gradient(135deg, var(--accent) 0%, #a29bfe 100%); border: none; color: white; padding: 17px; border-radius: 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 22px; transition: 0.2s; opacity: 1; }
+        .btn-save:active { transform: scale(0.97); }
+
+        /* Tombol Batal & Reset */
+        .btn-secondary-row { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-secondary { flex: 1; background: var(--input-bg); border: 1.5px solid rgba(150,150,150,0.2); color: var(--text-sub); padding: 14px; border-radius: 14px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-secondary:active { transform: scale(0.96); background: var(--glass-bg-hi); }
+        .btn-reset-text { color: var(--libur); }
 
         .loc-box { display: flex; align-items: center; gap: 10px; background: var(--input-bg); border: 1.5px solid rgba(150,150,150,0.2); padding: 10px 14px; border-radius: 14px;}
         .btn-loc { background: rgba(108,92,231,0.1); color: var(--accent); border: none; padding: 8px 12px; border-radius: 10px; font-weight: 700; font-size: 0.75rem; cursor: pointer; transition: 0.2s;}
@@ -213,7 +220,7 @@
         .loc-text { font-size: 0.75rem; color: var(--text-dim); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .loc-text a { color: var(--izin); text-decoration: none; font-weight: bold; }
 
-        /* TEMPLATE PDF (Disembunyikan secara normal) */
+        /* TEMPLATE PDF */
         #pdf-template { display: none; width: 800px; padding: 50px; background: white; color: black; font-family: sans-serif; position: absolute; top: 0; left: 0; z-index: -9999; }
         .pdf-header { text-align: center; margin-bottom: 30px; }
         .pdf-header h1 { font-size: 28px; color: #2c3e50; margin-bottom: 5px; }
@@ -355,7 +362,12 @@
             <textarea id="keterangan" class="notes-input" rows="2" placeholder="Tulis keterangan..."></textarea>
         </div>
 
-        <button id="saveBtn" class="btn-save" onclick="saveData()" disabled>Simpan Presensi</button>
+        <!-- Tombol Aksi -->
+        <button id="saveBtn" class="btn-save" onclick="saveData()">Simpan Presensi</button>
+        <div class="btn-secondary-row">
+            <button class="btn-secondary btn-reset-text" onclick="resetModal()">Ulang</button>
+            <button class="btn-secondary" onclick="closeModal()">Batal</button>
+        </div>
     </div>
 </div>
 
@@ -441,7 +453,6 @@
         const syncStatus = document.getElementById('syncStatus');
         
         if (user) {
-            // UI saat Login
             btnAuth.style.color = "var(--libur)";
             btnAuth.title = "Logout";
             btnAuth.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
@@ -449,7 +460,6 @@
             syncStatus.innerHTML = '<span class="dot"></span>Sinkronasi aktif';
             syncStatus.classList.add('online');
             
-            // Mengambil & Mencocokkan data dari Cloud Firebase
             db.ref('users/' + user.uid + '/absensiData').once('value').then(snapshot => {
                 const cloudData = snapshot.val();
                 if (cloudData) {
@@ -457,13 +467,11 @@
                     localStorage.setItem('absensiData', JSON.stringify(appData));
                     renderCalendar();
                 } else {
-                    // Kalau di cloud kosong, backup data lokal ke cloud
                     db.ref('users/' + user.uid + '/absensiData').set(appData);
                 }
             }).catch(err => console.error("Gagal menarik data:", err));
 
         } else {
-            // UI saat Logout (Offline Mode)
             btnAuth.style.color = "var(--accent)";
             btnAuth.title = "Login Firebase";
             btnAuth.innerHTML = '<svg viewBox="0 0 24 24"><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>';
@@ -566,18 +574,16 @@
         const now = new Date();
         document.getElementById('pdfTanggalCetak').innerText = `${now.getDate()} ${monthsName[now.getMonth()]} ${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`;
 
-        // 1. Munculkan elemen secara instan agar terbaca sistem
         el.style.display = 'block';
 
         const opt = { 
             margin: 10, 
             filename: `Slip_Gaji_${monthsName[monthSelect.value]}_${yearSelect.value}.pdf`, 
             image: { type: 'jpeg', quality: 0.98 }, 
-            html2canvas: { scale: 2, windowWidth: 800 }, // Memaksa lebar agar rapi saat dicetak di HP
+            html2canvas: { scale: 2, windowWidth: 800 }, 
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
         };
         
-        // 2. Buat PDF, lalu sembunyikan kembali setelah selesai
         html2pdf().set(opt).from(el).save().then(() => {
             el.style.display = 'none';
         });
@@ -589,9 +595,12 @@
     function setPill(val) {
         document.querySelectorAll('.status-pill').forEach(p => p.className = 'status-pill' + (p.dataset.val===val ? ` active-${val}` : ''));
         document.getElementById('statusSelect').value = val;
-        checkValidation();
     }
-    function clearPills() { document.querySelectorAll('.status-pill').forEach(p => p.className='status-pill'); document.getElementById('statusSelect').value = ""; checkValidation(); }
+    
+    function clearPills() { 
+        document.querySelectorAll('.status-pill').forEach(p => p.className='status-pill'); 
+        document.getElementById('statusSelect').value = ""; 
+    }
     
     function setLembur(val) {
         currentLembur = val; document.getElementById('lemburSelect').value = val;
@@ -603,11 +612,6 @@
             info.textContent = `Dihitung ${d} Jam = Rp ${b.toLocaleString('id-ID')}`;
             info.style.color = "var(--accent)";
         }
-    }
-    function checkValidation() { 
-        const ok = document.getElementById('statusSelect').value !== ""; 
-        document.getElementById('saveBtn').disabled = !ok; 
-        document.getElementById('saveBtn').classList.toggle('can-save', ok); 
     }
 
     let startX = 0;
@@ -679,7 +683,6 @@
             
             let cls = 'date-box' + (data ? ` status-${data.status}` : '');
             
-            // Logika Indikator Baru (Lemburan dan Catatan)
             let indicators = '';
             if (data) {
                 let iconLembur = data.lembur > 0 ? '🕒' : '';
@@ -708,31 +711,58 @@
         if(currentLat) document.getElementById('locStatus').innerHTML = `<a href="https://maps.google.com/?q=${currentLat},${currentLng}" target="_blank">📍 Lokasi Tersimpan</a>`;
         else document.getElementById('locStatus').innerText = "Belum direkam";
 
-        checkValidation(); document.getElementById('modal').classList.add('active');
+        document.getElementById('modal').classList.add('active');
     }
 
     function closeModal() {
         const overlay = document.getElementById('modal'); overlay.classList.add('closing');
         setTimeout(()=>{ overlay.classList.remove('active','closing'); },280);
     }
+    
+    // Fungsi untuk mereset isi modal kembali kosong (bawaan)
+    function resetModal() {
+        clearPills();
+        document.getElementById('jamMasuk').value = "";
+        document.getElementById('jamKeluar').value = "";
+        setLembur(0);
+        document.getElementById('keterangan').value = "";
+    }
 
     function openHadirDetail() { document.getElementById('hadirModal').classList.add('active'); }
     function openLemburDetail() { document.getElementById('lemburModal').classList.add('active'); }
 
     function saveData() {
-        // Simpan data di local storage
-        appData[activeKey] = {
-            status:  document.getElementById('statusSelect').value,
-            masuk:   document.getElementById('jamMasuk').value,
-            keluar:  document.getElementById('jamKeluar').value,
-            lembur:  currentLembur,
-            lemburBayaran: LEMBUR_RATES[currentLembur],
-            keterangan: document.getElementById('keterangan').value,
-            lat: currentLat, lng: currentLng
-        };
+        const status = document.getElementById('statusSelect').value;
+        const jamMasuk = document.getElementById('jamMasuk').value;
+        
+        // --- LOGIKA PERINGATAN ---
+        // Jika status yang dipilih adalah Hadir tapi jam masuk kosong, berikan peringatan.
+        if (status === "Hadir" && jamMasuk === "") {
+            alert("⚠️ PERINGATAN:\nAnda memilih status 'Hadir'. Mohon pastikan Anda mengisi Jam Masuk terlebih dahulu!");
+            return; // Hentikan proses simpan
+        }
+        // -------------------------
+
+        // --- PROSES SIMPAN / HAPUS ---
+        if (status === "") {
+            // Jika status dikosongkan (di-Ulang), maka HAPUS data hari tersebut dari kalender
+            delete appData[activeKey];
+        } else {
+            // Jika ada isinya, simpan datanya seperti biasa
+            appData[activeKey] = {
+                status:  status,
+                masuk:   jamMasuk,
+                keluar:  document.getElementById('jamKeluar').value,
+                lembur:  currentLembur,
+                lemburBayaran: LEMBUR_RATES[currentLembur],
+                keterangan: document.getElementById('keterangan').value,
+                lat: currentLat, lng: currentLng
+            };
+        }
+        
         localStorage.setItem('absensiData',JSON.stringify(appData));
         
-        // Push pembaruan ke Database Cloud Firebase (Jika Login)
+        // Sinkronisasi otomatis ke cloud
         if (currentUser) {
             db.ref('users/' + currentUser.uid + '/absensiData').set(appData)
               .catch(err => console.error("Gagal sinkronisasi data:", err));
@@ -746,7 +776,6 @@
     // 6. PERHITUNGAN AKURAT GAJI & LEMBUR
     // ============================================
     function updateStats(m,y) {
-        // ── 1. HITUNG KEHADIRAN (PERIODE 16 BULAN LALU s/d 15 BULAN INI) ──
         let hadirGaji = 0, liburGaji = 0, sakitGaji = 0, izinGaji = 0;
         let startGaji = new Date(y, m - 1, 16);
         let endGaji = new Date(y, m, 15);
@@ -769,7 +798,6 @@
         document.getElementById('detIzin').textContent  = izinGaji + " Hari";
         document.getElementById('detHadirGaji').textContent = hadirGaji;
 
-        // ── 2. HITUNG LEMBURAN (UNTUK KOTAK ATAS & MODAL: BULAN AKTIF 1-31) ──
         let c15 = 0, c25 = 0, c45 = 0, c55 = 0;
         let lemburJamAktif = 0;
         let totalDaysActive = new Date(y, m + 1, 0).getDate();
@@ -794,7 +822,6 @@
         document.getElementById('l55').textContent = `${c55}x (${c55*5.5} Jam)`;
         document.getElementById('totJamM').textContent = lemburJamAktif;
 
-        // ── 3. HITUNG NOMINAL UANG LEMBUR (UNTUK GAJI: BULAN LALU) ──
         let prevMonth = m - 1;
         let prevYear = y;
         if (prevMonth < 0) { prevMonth = 11; prevYear = y - 1; }
@@ -807,7 +834,6 @@
             if(d?.lemburBayaran) lemburUangTotalBulanLalu += d.lemburBayaran;
         }
 
-        // ── 4. TAMPILAN KARTU ESTIMASI GAJI ──
         const gajiPokok = hadirGaji * 272900;
         document.getElementById('gajiPokokVal').textContent = gajiPokok.toLocaleString('id-ID');
         document.getElementById('totalLemburVal').textContent = lemburUangTotalBulanLalu.toLocaleString('id-ID');
