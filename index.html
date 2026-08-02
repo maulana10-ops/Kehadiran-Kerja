@@ -213,8 +213,8 @@
         .loc-text { font-size: 0.75rem; color: var(--text-dim); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .loc-text a { color: var(--izin); text-decoration: none; font-weight: bold; }
 
-        /* PERBAIKAN TEMPLATE PDF (Disembunyikan di luar layar agar html2pdf tetap bisa membacanya tanpa blank) */
-        #pdf-template { position: fixed; left: 200vw; top: 0; width: 800px; padding: 50px; background: white; color: black; font-family: sans-serif; z-index: -9999; }
+        /* TEMPLATE PDF (Disembunyikan secara normal) */
+        #pdf-template { display: none; width: 800px; padding: 50px; background: white; color: black; font-family: sans-serif; position: absolute; top: 0; left: 0; z-index: -9999; }
         .pdf-header { text-align: center; margin-bottom: 30px; }
         .pdf-header h1 { font-size: 28px; color: #2c3e50; margin-bottom: 5px; }
         .pdf-header p { font-size: 14px; color: #7f8c8d; }
@@ -566,15 +566,21 @@
         const now = new Date();
         document.getElementById('pdfTanggalCetak').innerText = `${now.getDate()} ${monthsName[now.getMonth()]} ${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`;
 
+        // 1. Munculkan elemen secara instan agar terbaca sistem
+        el.style.display = 'block';
+
         const opt = { 
             margin: 10, 
             filename: `Slip_Gaji_${monthsName[monthSelect.value]}_${yearSelect.value}.pdf`, 
             image: { type: 'jpeg', quality: 0.98 }, 
-            html2canvas: { scale: 2 }, 
+            html2canvas: { scale: 2, windowWidth: 800 }, // Memaksa lebar agar rapi saat dicetak di HP
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
         };
         
-        html2pdf().set(opt).from(el).save();
+        // 2. Buat PDF, lalu sembunyikan kembali setelah selesai
+        html2pdf().set(opt).from(el).save().then(() => {
+            el.style.display = 'none';
+        });
     }
 
     // ============================================
