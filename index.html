@@ -147,9 +147,10 @@
         .date-box.status-Libur { background: var(--libur-bg); border-color: var(--libur-gl); color: var(--libur); box-shadow: 0 3px 12px var(--libur-gl); }
         .date-box.status-Sakit { background: var(--sakit-bg); border-color: var(--sakit-gl); color: var(--sakit); box-shadow: 0 3px 12px var(--sakit-gl); }
         .date-box.status-Izin { background: var(--izin-bg); border-color: var(--izin-gl); color: var(--izin); box-shadow: 0 3px 12px var(--izin-gl); }
-        .note-dot { position: absolute; top: 4px; right: 4px; width: 5px; height: 5px; border-radius: 50%; background: var(--sakit); box-shadow: 0 0 5px var(--sakit-gl); display: none; }
-        .has-note .note-dot { display: block; }
-
+        
+        /* Indikator baru (Ikon Lembur dan Notes) */
+        .indicators { position: absolute; top: 3px; right: 4px; display: flex; gap: 2px; font-size: 0.65rem; pointer-events: none; }
+        
         .salary-card { border-radius: 22px; padding: 20px 22px; position: relative; overflow: hidden; }
         .salary-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
         .salary-tag { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; color: var(--text-sub); display: flex; align-items: center; gap: 6px; }
@@ -191,8 +192,8 @@
         .status-pill { padding: 11px 6px; border-radius: 13px; border: 1.5px solid rgba(150,150,150,0.2); background: var(--input-bg); text-align: center; cursor: pointer; font-size: 0.72rem; font-weight: 700; color: var(--text-sub); transition: 0.2s; }
         .status-pill.active-Hadir { background: var(--hadir-bg); border-color: var(--hadir); color: var(--hadir); transform: scale(1.04); }
         .status-pill.active-Libur { background: var(--libur-bg); border-color: var(--libur); color: var(--libur); transform: scale(1.04); }
-        .status-pill.active-Sakit { background: var(--sakit-bg); border-color: var(--sakit); color: var(--sakit); transform: scale(1.04); }
-        .status-pill.active-Izin { background: var(--izin-bg); border-color: var(--izin); color: var(--izin); transform: scale(1.04); }
+        .status-pill.active-Sakit { background: var(--sakit-bg); border-color: var(--sakit-gl); color: var(--sakit); transform: scale(1.04); }
+        .status-pill.active-Izin { background: var(--izin-bg); border-color: var(--izin-gl); color: var(--izin); transform: scale(1.04); }
 
         .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .time-input, .notes-input { width: 100%; background: var(--input-bg); border: 1.5px solid rgba(150,150,150,0.2); color: var(--text); padding: 14px; border-radius: 14px; outline: none; font-family: 'Space Mono', monospace; transition: 0.2s; }
@@ -212,8 +213,8 @@
         .loc-text { font-size: 0.75rem; color: var(--text-dim); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .loc-text a { color: var(--izin); text-decoration: none; font-weight: bold; }
 
-        /* TEMPLATE PDF (Diubah agar tidak blank saat diunduh) */
-        #pdf-template { display: none; position: absolute; top: 0; left: 0; z-index: -99; width: 800px; padding: 50px; background: white; color: black; font-family: sans-serif; }
+        /* PERBAIKAN TEMPLATE PDF (Disembunyikan di luar layar agar html2pdf tetap bisa membacanya tanpa blank) */
+        #pdf-template { position: fixed; left: 200vw; top: 0; width: 800px; padding: 50px; background: white; color: black; font-family: sans-serif; z-index: -9999; }
         .pdf-header { text-align: center; margin-bottom: 30px; }
         .pdf-header h1 { font-size: 28px; color: #2c3e50; margin-bottom: 5px; }
         .pdf-header p { font-size: 14px; color: #7f8c8d; }
@@ -565,9 +566,6 @@
         const now = new Date();
         document.getElementById('pdfTanggalCetak').innerText = `${now.getDate()} ${monthsName[now.getMonth()]} ${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`;
 
-        // Tampilkan sementara di layar saat html2pdf merekam HTML
-        el.style.display = 'block';
-
         const opt = { 
             margin: 10, 
             filename: `Slip_Gaji_${monthsName[monthSelect.value]}_${yearSelect.value}.pdf`, 
@@ -576,10 +574,7 @@
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
         };
         
-        // Buat PDF, lalu sembunyikan templatenya kembali
-        html2pdf().set(opt).from(el).save().then(() => {
-            el.style.display = 'none';
-        });
+        html2pdf().set(opt).from(el).save();
     }
 
     // ============================================
@@ -673,10 +668,23 @@
 
         for(let e=0;e<firstDay;e++){ cal.innerHTML += `<div class="date-empty"></div>`; }
         for(let i=1;i<=totalDays;i++){
-            const key = `${y}-${m}-${i}`, data = appData[key];
+            const key = `${y}-${m}-${i}`;
+            const data = appData[key];
+            
             let cls = 'date-box' + (data ? ` status-${data.status}` : '');
-            let dot = (data?.lembur>0 || data?.keterangan?.trim() || data?.lat) ? '<div class="note-dot"></div>' : '';
-            cal.innerHTML += `<div class="${cls}" onclick="openModal('${key}',${i},${m},${y})">${i}${dot}</div>`;
+            
+            // Logika Indikator Baru (Lemburan dan Catatan)
+            let indicators = '';
+            if (data) {
+                let iconLembur = data.lembur > 0 ? '🕒' : '';
+                let iconNote = (data.keterangan && data.keterangan.trim() !== '') ? '📝' : '';
+                
+                if (iconLembur || iconNote) {
+                    indicators = `<div class="indicators">${iconLembur}${iconNote}</div>`;
+                }
+            }
+
+            cal.innerHTML += `<div class="${cls}" onclick="openModal('${key}',${i},${m},${y})">${i}${indicators}</div>`;
         }
         updateStats(m,y);
     }
